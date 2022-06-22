@@ -37,6 +37,7 @@ SOURCES		:=  \
 			source/sead  \
 			source/puppets  \
 			source/server/hns  \
+			source/server/sardines  \
 			source/server/gamemode  \
 			source/server/gamemode/modifiers  \
 			source/server  \
