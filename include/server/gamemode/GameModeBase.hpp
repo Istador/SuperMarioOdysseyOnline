@@ -1,45 +1,15 @@
 #pragma once
 
-#include <cmath>
-#include <math.h>
 #include "puppets/PuppetHolder.hpp"
-#include "al/actor/ActorInitInfo.h"
 #include "al/actor/IUseName.h"
-#include "al/scene/Scene.h"
 #include "al/scene/SceneObjHolder.h"
-#include "game/GameData/GameDataHolder.h"
+#include "game/HakoniwaSequence/HakoniwaSequence.h"
 #include "game/StageScene/StageScene.h"
-#include "layouts/HideAndSeekIcon.h"
 #include "prim/seadSafeString.h"
-#include "server/gamemode/GameModeConfigMenu.hpp"
-
-// enum for defining game mode types
-enum GameMode : s8 {
-    NONE = -1,
-    HIDEANDSEEK,
-};
-
-// struct containing info about the games state for use in gamemodes
-struct GameModeInitInfo {
-    GameModeInitInfo(al::ActorInitInfo* info, al::Scene* scene) {
-        mLayoutInitInfo = info->mLayoutInitInfo;
-        mPlayerHolder   = info->mActorSceneInfo.mPlayerHolder;
-        mSceneObjHolder = info->mActorSceneInfo.mSceneObjHolder;
-        mScene          = scene;
-    };
-
-    void initServerInfo(GameMode mode, PuppetHolder* pupHolder) {
-        mMode         = mode;
-        mPuppetHolder = pupHolder;
-    }
-
-    al::LayoutInitInfo* mLayoutInitInfo;
-    al::PlayerHolder*   mPlayerHolder;
-    al::SceneObjHolder* mSceneObjHolder;
-    al::Scene*          mScene;
-    GameMode            mMode = GameMode::NONE;
-    PuppetHolder*       mPuppetHolder;
-};
+#include "sead/devenv/seadDebugFontMgrNvn.h"
+#include "sead/gfx/seadTextWriter.h"
+#include "server/gamemode/GameMode.hpp"
+#include "server/gamemode/GameModeInitInfo.hpp"
 
 // base class for all gamemodes, must inherit from this to have a functional gamemode
 class GameModeBase : public al::IUseName, public al::IUseSceneObjHolder {
@@ -52,12 +22,39 @@ public:
     virtual GameMode getMode() { return mMode; }
 
     virtual bool isModeActive() const { return mIsActive; }
+    virtual bool isUseNormalUI() const { return true; }
+    virtual bool ignoreComboBtn() const { return false; }
+    virtual bool pauseTimeWhenPaused() const { return false; }
 
     virtual void init(GameModeInitInfo const& info);
 
-    virtual void begin() { mIsActive = true; }
-    virtual void update();
-    virtual void end() { mIsActive = false; }
+    virtual void begin();
+    virtual void update() {};
+    virtual void end();
+
+    virtual void pause() { mIsActive = false; };
+    virtual void unpause() { mIsActive = true; };
+
+    virtual bool showNameTag(PuppetInfo* other) { return false; }
+    virtual bool showNameTagEverywhere(PuppetActor* other) { return false; }
+
+    virtual void debugMenuControls(sead::TextWriter* gTextWriter) {}
+    virtual void debugMenuPlayer(sead::TextWriter* gTextWriter, PuppetInfo* other = nullptr) {}
+
+    virtual void processPacket(Packet* packet) {};
+
+    virtual Packet* createPacket() { return nullptr; }
+
+    virtual void onHakoniwaSequenceFirstStep(HakoniwaSequence* sequence) {}
+    virtual void onBorderPullBackFirstStep(al::LiveActor* actor) {}
+
+    virtual bool hasCustomCamera() const { return false; }
+    virtual void createCustomCameraTicket(al::CameraDirector* director) {}
+
+    virtual bool hasMarioCollision() { return true;  }
+    virtual bool hasMarioBounce()    { return true;  }
+    virtual bool hasCappyCollision() { return false; }
+    virtual bool hasCappyBounce()    { return false; }
 
 protected:
     sead::FixedSafeString<0x10> mName;

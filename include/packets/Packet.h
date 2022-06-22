@@ -1,8 +1,5 @@
 #pragma once
 
-#include "sead/math/seadVector.h"
-#include "sead/math/seadQuat.h"
-
 #include "nn/account.h"
 
 #include "types.h"
@@ -18,7 +15,7 @@ enum PacketType : short {
     PLAYERINF,
     HACKCAPINF,
     GAMEINF,
-    TAGINF,
+    GAMEMODEINF,
     PLAYERCON,
     PLAYERDC,
     COSTUMEINF,
@@ -38,7 +35,7 @@ USED static const char* packetNames[] = {
     "Player Info",
     "Player Cap Info",
     "Game Info",
-    "Tag Info",
+    "Gamemode Info",
     "Player Connect",
     "Player Disconnect",
     "Costume Info",
@@ -65,20 +62,3 @@ struct PACKED Packet {
     PacketType mType = PacketType::UNKNOWN;
     short mPacketSize = 0; // represents packet size without size of header
 };
-
-// all packet types
-
-#include "packets/PlayerInfPacket.h"
-#include "packets/PlayerConnect.h"
-#include "packets/PlayerDC.h"
-#include "packets/GameInf.h"
-#include "packets/TagInf.h"
-#include "packets/CostumeInf.h"
-#include "packets/ServerCommand.h"
-#include "packets/ShineCollect.h"
-#include "packets/CaptureInf.h"
-#include "packets/HackCapInf.h"
-#include "packets/ChangeStagePacket.h"
-#include "packets/InitPacket.h"
-#include "packets/UdpPacket.h"
-#include "packets/HolePunchPacket.h"

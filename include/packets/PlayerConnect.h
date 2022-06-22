@@ -2,7 +2,7 @@
 
 #include "Packet.h"
 
-#include <cstdint>
+#include <climits>
 
 struct PACKED PlayerConnect : Packet {
     PlayerConnect() : Packet() {

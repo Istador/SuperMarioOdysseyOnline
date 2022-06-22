@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Packet.h"
-#include "al/util.hpp"
 #include "algorithms/PlayerAnims.h"
+#include "sead/math/seadVector.h"
+#include "sead/math/seadQuat.h"
 
 struct PACKED PlayerInf : Packet {
     PlayerInf() : Packet() {

@@ -1,5 +1,11 @@
 #include "debugMenu.hpp"
 
+#include "agl/utl.h"
+#include "al/util.hpp"
+#include "game/System/GameSystem.h"
+#include "sead/gfx/seadPrimitiveRenderer.h"
+#include "sead/math/seadMatrix.hpp"
+
 static const char *DBG_FONT_PATH = "DebugData/Font/nvn_font_jis1.ntx";
 static const char *DBG_SHADER_PATH = "DebugData/Font/nvn_font_shader_jis1.bin";
 static const char *DBG_TBL_PATH = "DebugData/Font/nvn_font_jis1_tbl.bin";

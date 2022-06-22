@@ -1,16 +1,7 @@
-#include "layouts/HideAndSeekIcon.h"
-#include <cstdio>
-#include <cstring>
-#include "puppets/PuppetInfo.h"
-#include "al/string/StringTmp.h"
-#include "prim/seadSafeString.h"
-#include "server/gamemode/GameModeTimer.hpp"
-#include "server/hns/HideAndSeekMode.hpp"
-#include "server/Client.hpp"
+#include "server/hns/HideAndSeekIcon.h"
+
+#include "server/gamemode/GameModeManager.hpp"
 #include "al/util.hpp"
-#include "logger.hpp"
-#include "rs/util.hpp"
-#include "main.hpp"
 
 HideAndSeekIcon::HideAndSeekIcon(const char* name, const al::LayoutInitInfo& initInfo) : al::LayoutActor(name) {
     al::initLayoutActor(this, initInfo, "HideAndSeekIcon", 0);
@@ -55,45 +46,27 @@ void HideAndSeekIcon::exeAppear() {
     }
 }
 
+const char* HideAndSeekIcon::getRoleIcon(bool isIt) {
+    return isIt ? "\uE002" : "\uE001";
+}
+
+GameMode HideAndSeekIcon::getGameMode() {
+    return GameMode::HIDEANDSEEK;
+}
+
+bool HideAndSeekIcon::isMeIt() {
+    return mInfo->mIsPlayerIt;
+}
+
 void HideAndSeekIcon::exeWait() {
     if (al::isFirstStep(this)) {
         al::startAction(this, "Wait", 0);
     }
 
-    GameTime& curTime = mInfo->mHidingTime;
+    al::setPaneStringFormat(this, "TxtCounter", mInfo->mHidingTime.to_string().c_str());
 
-    if (curTime.mHours > 0) {
-        al::setPaneStringFormat(this, "TxtCounter", "%01d:%02d:%02d", curTime.mHours, curTime.mMinutes, curTime.mSeconds);
-    } else {
-        al::setPaneStringFormat(this, "TxtCounter", "%02d:%02d", curTime.mMinutes, curTime.mSeconds);
-    }
-
-    int playerCount = Client::getMaxPlayerCount();
-
-    if (playerCount > 0) {
-        char playerNameBuf[0x100] = {0}; // max of 16 player names if player name size is 0x10
-
-        sead::BufferedSafeStringBase<char> playerList = sead::BufferedSafeStringBase<char>(playerNameBuf, 0x200);
-
-        // Add your own name to the list at the top
-        playerList.appendWithFormat("%s %s\n", mInfo->mIsPlayerIt ? "\uE002" : "\uE001", Client::instance()->getClientName());
-
-        // Add all seekers to the list
-        for (int i = 0; i < playerCount; i++) {
-            PuppetInfo* curPuppet = Client::getPuppetInfo(i);
-            if (curPuppet && curPuppet->isConnected && curPuppet->isIt) {
-                playerList.appendWithFormat("\uE002 %s\n", curPuppet->puppetName);
-            }
-        }
-
-        // Add all hiders to the list
-        for (int i = 0; i < playerCount; i++) {
-            PuppetInfo* curPuppet = Client::getPuppetInfo(i);
-            if (curPuppet && curPuppet->isConnected && !curPuppet->isIt) {
-                playerList.appendWithFormat("\uE001 %s\n", curPuppet->puppetName);
-            }
-        }
-
+    auto playerList = getPlayerList();
+    if (!playerList.isEmpty()) {
         al::setPaneStringFormat(this, "TxtPlayerList", playerList.cstr());
     }
 }

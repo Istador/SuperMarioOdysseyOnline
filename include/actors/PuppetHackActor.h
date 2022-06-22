@@ -1,11 +1,8 @@
 #pragma once
 
+#include "al/actor/ActorInitInfo.h"
 #include "al/LiveActor/LiveActor.h"
-#include "al/util.hpp"
-
-#include "logger.hpp"
 #include "puppets/PuppetInfo.h"
-#include "helpers.hpp"
 
 // TODO: Make this actor only created once per puppet, and use SubActorKeeper to create PartsModel actors for each capture
 

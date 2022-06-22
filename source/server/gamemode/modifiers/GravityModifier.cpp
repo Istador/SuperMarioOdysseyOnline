@@ -1,7 +1,8 @@
 #include "server/gamemode/modifiers/GravityModifier.hpp"
+
 #include "helpers.hpp"
-#include "math/seadVector.h"
 #include "rs/util.hpp"
+#include "sead/math/seadVector.h"
 
 GravityModifier::GravityModifier(GameModeBase* mode) : ModeModifierBase(mode) {}
 

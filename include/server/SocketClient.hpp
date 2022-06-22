@@ -1,22 +1,14 @@
 #pragma once
 
-#include "SocketBase.hpp"
 #include "al/async/AsyncFunctorThread.h"
-#include "heap/seadHeap.h"
+
 #include "nn/result.h"
-#include "sead/math/seadVector.h"
-#include "sead/math/seadQuat.h"
-#include "sead/container/seadPtrArray.h"
+#include "nn/socket.h"
 
-#include "al/util.hpp"
+#include "sead/heap/seadHeap.h"
+#include "sead/thread/seadMessageQueue.h"
 
-#include "nn/account.h"
-
-#include "syssocket/sockdefines.h"
-
-#include "thread/seadMessageQueue.h"
-#include "thread/seadMutex.h"
-#include "types.h"
+#include "SocketBase.hpp"
 
 #include "packets/Packet.h"
 
@@ -26,8 +18,9 @@ class SocketClient : public SocketBase {
     public:
         SocketClient(const char* name, sead::Heap* heap, Client* client);
         nn::Result init(const char* ip, u16 port) override;
-        bool tryReconnect();
+        bool tryReconnect() override;
         bool closeSocket() override;
+        Packet* tryGetPacket() override;
 
         bool startThreads();
         void endThreads();
@@ -41,8 +34,6 @@ class SocketClient : public SocketBase {
 
         void sendFunc();
         void recvFunc();
-
-        Packet* tryGetPacket(sead::MessageQueue::BlockType blockType = sead::MessageQueue::BlockType::Blocking);
 
         void printPacket(Packet* packet);
         bool isConnected() { return socket_log_state == SOCKET_LOG_CONNECTED; }

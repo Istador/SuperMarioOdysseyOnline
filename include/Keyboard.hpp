@@ -1,12 +1,8 @@
 #pragma once
 
-#include <cstddef>
 #include "al/async/AsyncFunctorThread.h"
-#include "al/async/FunctorV0M.hpp"
 
 #include "nn/swkbd/swkbd.h"
-
-#include "logger.hpp"
 
 typedef void (*KeyboardSetup)(nn::swkbd::KeyboardConfig&);
 

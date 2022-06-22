@@ -28,12 +28,12 @@
 #include "game/Player/PlayerFunction.h"
 #include "game/StageScene/StageScene.h"
 #include "helpers.hpp"
-#include "layouts/HideAndSeekIcon.h"
 #include "logger.hpp"
 #include "rs/util.hpp"
+#include "sead/gfx/seadPrimitiveRenderer.h"
 #include "server/gamemode/GameModeBase.hpp"
-#include "server/hns/HideAndSeekMode.hpp"
 #include "server/gamemode/GameModeManager.hpp"
+#include "server/gamemode/GameModeFactory.hpp"
 
 static int pInfSendTimer = 0;
 static int gameInfSendTimer = 0;
@@ -74,7 +74,12 @@ static int pageIndex = 0;
 static const int maxPages = 3;
 
 void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead::DrawContext* drawContext) {
-    Time::calcTime();  // this needs to be ran every frame, so running it here works
+    GameModeManager* gmm  = GameModeManager::instance();
+    GameModeBase*    mode = gmm->getMode<GameModeBase>();
+
+    if (!mode || !mode->pauseTimeWhenPaused() || !gmm->isPaused()) {
+        Time::calcTime(); // this needs to be ran every frame, so running it here works
+    }
 
     if (!debugMode) {
         al::executeDraw(curSequence->mLytKit, "２Ｄバック（メイン画面）");
@@ -164,6 +169,9 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
         renderer->setCamera(*cam);
         renderer->setProjection(*projection);
 
+        GameMode      gameMode     = GameModeManager::instance()->getGameMode();
+        GameModeBase* gameModeBase = GameModeManager::instance()->getMode<GameModeBase>();
+
         gTextWriter->printf("(ZR ←)------------ Page %d/%d -------------(ZR →)\n", pageIndex + 1, maxPages);
 
         switch (pageIndex)
@@ -181,6 +189,7 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
                 if (debugPuppetIndex == 0) {
                     gTextWriter->printf("Player Name: %s\n",       Client::getClientName());
                     gTextWriter->printf("Connection Status: %s\n", isConnected ? "Online" : "Offline");
+                    gTextWriter->printf("Game mode: %i | %s\n",    gameMode, GameModeFactory::getModeName(gameMode));
                     gTextWriter->printf("Is in same Stage: Yes\n");
                     gTextWriter->printf("Stage: %s\n",            client->getLastGameInfPacket()->stageName);
                     gTextWriter->printf("Scenario: %u\n",         client->getLastGameInfPacket()->scenarioNo);
@@ -196,6 +205,10 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
                             gTextWriter->printf("Animation: %s\n", p1->mPlayerAnimator->mAnimFrameCtrl->getActionName());
                         }
                     }
+
+                    if (gameModeBase) {
+                        gameModeBase->debugMenuPlayer(gTextWriter);
+                    }
                 } else if (curPuppet) {
                     al::LiveActor* curModel = curPuppet->getCurrentModel();
 
@@ -204,6 +217,7 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
                     if (curModel && curPupInfo) {
                         gTextWriter->printf("Player Name: %s\n",       curPupInfo->puppetName);
                         gTextWriter->printf("Connection Status: %s\n", curPupInfo->isConnected ? "Online" : "Offline");
+                        gTextWriter->printf("Game mode: %i | %s\n",    curPupInfo->gameMode, GameModeFactory::getModeName(curPupInfo->gameMode));
                         gTextWriter->printf("Is in same Stage: %s\n",  curPupInfo->isInSameStage ? "Yes" : "No");
                         gTextWriter->printf("Stage: %s\n",             curPupInfo->stageName);
                         gTextWriter->printf("Scenario: %u\n",          curPupInfo->scenarioNo);
@@ -212,6 +226,9 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
                         gTextWriter->printf("Animation:  %d  %s\n",    curPupInfo->curAnim, curPupInfo->curAnimStr);
                         if (!curPupInfo->isCaptured) {
                             gTextWriter->printf("Model Animation: %s\n", al::getActionName(curModel));
+                        }
+                        if (gameModeBase) {
+                            gameModeBase->debugMenuPlayer(gTextWriter, curPupInfo);
                         }
                     }
                 }
@@ -257,15 +274,9 @@ void drawMainHook(HakoniwaSequence* curSequence, sead::Viewport* viewport, sead:
         case 2:
             {
                 gTextWriter->printf("------------------- Controls --------------------\n\n");
-                gTextWriter->printf("Main/Pause Menu:\n");
-                gTextWriter->printf("- ZL + A | Mod configuration\n");
-                gTextWriter->printf("\nIn-game:\n");
-                gTextWriter->printf("- L + ← | Enable/disable Hide & Seek [H&S]\n");
-                gTextWriter->printf("- [H&S] ↑ | Switch between hider and seeker\n");
-                gTextWriter->printf("- [H&S][Hider] ← | Decrease hiding time\n");
-                gTextWriter->printf("- [H&S][Hider] → | Increase hiding time\n");
-                gTextWriter->printf("- [H&S][Hider] L + ↓ | Reset hiding time\n");
-                gTextWriter->printf("- [H&S][Gravity] L + → | Toggle gravity camera\n");
+                if (gameModeBase) {
+                    gameModeBase->debugMenuControls(gTextWriter);
+                }
                 gTextWriter->printf("\n- ZR + ↑ | Open/close this debug menu\n");
             }
             break;
@@ -325,7 +336,7 @@ void stageInitHook(
 
     if (GameModeManager::instance()->getGameMode() != NONE) {
         GameModeInitInfo initModeInfo(info, curScene);
-        initModeInfo.initServerInfo(GameModeManager::instance()->getGameMode(), Client::getPuppetHolder());
+        initModeInfo.initServerInfo(GameModeManager::instance()->getNextGameMode(), Client::getPuppetHolder());
 
         GameModeManager::instance()->initScene(initModeInfo);
     }
@@ -442,6 +453,13 @@ bool hakoniwaSequenceHook(HakoniwaSequence* sequence) {
     if (isDisableMusic) {
         if (al::isPlayingBgm(stageScene)) {
             al::stopAllBgm(stageScene, 0);
+        }
+    }
+
+    if (isFirstStep) {
+        GameModeBase* mode = GameModeManager::instance()->getMode<GameModeBase>();
+        if (mode) {
+            mode->onHakoniwaSequenceFirstStep(sequence);
         }
     }
 

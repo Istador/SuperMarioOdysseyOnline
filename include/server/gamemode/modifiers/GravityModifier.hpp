@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ModeModifierBase.hpp"
-#include "game/StageScene/StageScene.h"
 
 class GravityModifier : public ModeModifierBase {
     public:

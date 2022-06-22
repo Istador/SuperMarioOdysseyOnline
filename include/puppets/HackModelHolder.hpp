@@ -1,8 +1,4 @@
 #pragma once
-#include "al/LiveActor/LiveActor.h"
-#include "al/util.hpp"
-
-#include "sead/prim/seadSafeString.hpp"
 
 #include "helpers.hpp"
 #include "actors/PuppetHackActor.h"

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "nn/result.h"
 #include "SocketBase.hpp"
-#include "types.h"
 
 class Logger : public SocketBase {
     public:

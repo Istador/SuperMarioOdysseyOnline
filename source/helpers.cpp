@@ -1,5 +1,6 @@
 #include "helpers.hpp"
 #include "al/LiveActor/LiveActor.h"
+#include "game/GameData/GameDataFunction.h"
 #include "logger.hpp"
 #include "sead/math/seadMathCalcCommon.h"
 #include "sead/math/seadQuat.h"
@@ -72,6 +73,14 @@ void logQuat(const char* quatName, sead::Quatf& quat) {
 
 float vecMagnitude(sead::Vector3f const& input) {
     return (input.x * input.x + input.y * input.y + input.z * input.z);
+}
+
+float vecDistance(sead::Vector3f const& a, sead::Vector3f const& b) {
+    return sqrt(vecDistanceSq(a, b));
+}
+
+float vecDistanceSq(sead::Vector3f const& a, sead::Vector3f const& b) {
+    return pow(a.x - b.x, 2) + pow(a.y - b.y, 2) + pow(a.z - b.z, 2);
 }
 
 float quatAngle(sead::Quatf const& q1, sead::Quatf& q2) {

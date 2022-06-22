@@ -1,6 +1,5 @@
 #include "Keyboard.hpp"
-#include "logger.hpp"
-#include "nn/os.h"
+#include "al/async/FunctorV0M.hpp"
 #include "nn/swkbd/swkbd.h"
 
 Keyboard::Keyboard(ulong strSize) : mResultString(strSize) {

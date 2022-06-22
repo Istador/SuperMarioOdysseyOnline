@@ -1,25 +1,29 @@
+#include "actors/PuppetActor.h"
+
 #include <cmath>
 #include <cstddef>
-#include "al/model/PartsModel.h"
-#include "al/util/SensorUtil.h"
-#include "game/Player/PlayerCostumeFunction.h"
-#include "game/Player/PlayerCostumeInfo.h"
-#include "rs/util/SensorUtil.h"
-#include "server/Client.hpp"
-#include "al/LiveActor/LiveActor.h"
-#include "al/layout/BalloonMessage.h"
+
 #include "al/layout/LayoutInitInfo.h"
+#include "al/model/PartsModel.h"
 #include "al/string/StringTmp.h"
 #include "al/util.hpp"
 #include "al/util/LiveActorUtil.h"
+#include "al/util/SensorUtil.h"
+
 #include "algorithms/CaptureTypes.h"
+
+#include "game/Player/PlayerCostumeFunction.h"
+#include "game/Player/PlayerCostumeInfo.h"
+#include "game/Player/PlayerFunction.h"
+
 #include "logger.hpp"
-#include "actors/PuppetActor.h"
-#include "math/seadQuat.h"
-#include "math/seadVector.h"
+
+#include "rs/util/SensorUtil.h"
+
+#include "sead/math/seadQuat.h"
+
+#include "server/DeltaTime.hpp"
 #include "server/gamemode/GameModeManager.hpp"
-#include "server/gamemode/GameModeBase.hpp"
-#include "server/hns/HideAndSeekMode.hpp"
 
 static const char* subActorNames[] = {
     "顔", // Face
@@ -184,8 +188,8 @@ void PuppetActor::control() {
         }
 
         if (mNameTag) {
-            if (GameModeManager::instance()->isModeAndActive(GameMode::HIDEANDSEEK)) {
-                mNameTag->mIsAlive = GameModeManager::instance()->getMode<HideAndSeekMode>()->isPlayerIt() && mInfo->isIt;
+            if (GameModeManager::instance()->isActive()) {
+                mNameTag->mIsAlive = GameModeManager::instance()->getMode<GameModeBase>()->showNameTag(mInfo);
             } else if (!mNameTag->mIsAlive) {
                 mNameTag->appear();
             }
@@ -229,16 +233,22 @@ void PuppetActor::makeActorDead() {
 }
 
 void PuppetActor::attackSensor(al::HitSensor* source, al::HitSensor* target) {
+    if (!GameModeManager::hasMarioCollision()) {
+        return;
+    }
+
     if (!al::sendMsgPush(target, source)) {
         rs::sendMsgPushToPlayer(target, source);
+        rs::sendMsgPlayerDisregardTargetMarker(target, source);
     }
 }
 
 bool PuppetActor::receiveMsg(const al::SensorMsg* msg, al::HitSensor* source, al::HitSensor* target) {
-
-    if ((al::isMsgPlayerTrampleReflect(msg) || rs::isMsgPlayerAndCapObjHipDropReflectAll(msg)) && al::isSensorName(target, "Body")) {
-        rs::requestHitReactionToAttacker(msg, target, source);
-        return true;
+    if (GameModeManager::hasMarioBounce()) {
+        if ((al::isMsgPlayerTrampleReflect(msg) || rs::isMsgPlayerAndCapObjHipDropReflectAll(msg)) && al::isSensorName(target, "Body")) {
+            rs::requestHitReactionToAttacker(msg, target, source);
+            return true;
+        }
     }
 
     return false;
