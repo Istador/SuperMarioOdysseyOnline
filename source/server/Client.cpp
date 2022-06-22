@@ -5,6 +5,7 @@
 #include "heap/seadHeapMgr.h"
 #include "logger.hpp"
 #include "packets/Packet.h"
+#include "server/gamemode/GameModeManager.hpp"
 #include "server/hns/HideAndSeekMode.hpp"
 
 SEAD_SINGLETON_DISPOSER_IMPL(Client)
@@ -341,9 +342,7 @@ void Client::readFunc() {
                 if (lastCostumeInfPacket.mUserID == mUserID) {
                     mSocket->send(&lastCostumeInfPacket);
                 }
-                if (lastTagInfPacket.mUserID == mUserID) {
-                    mSocket->send(&lastTagInfPacket);
-                }
+                sendGameModeInfPacket();
                 if (lastCaptureInfPacket.mUserID == mUserID) {
                     mSocket->send(&lastCaptureInfPacket);
                 }
@@ -360,8 +359,8 @@ void Client::readFunc() {
                 curPacket->mUserID.print();
                 disconnectPlayer((PlayerDC*)curPacket);
                 break;
-            case PacketType::TAGINF:
-                updateTagInfo((TagInf*)curPacket);
+            case PacketType::GAMEMODEINF:
+                GameModeManager::processModePacket(curPacket);
                 break;
             case PacketType::CHANGESTAGE:
                 sendToStage((ChangeStagePacket*)curPacket);
@@ -577,7 +576,7 @@ void Client::sendGameInfPacket(GameDataHolderAccessor holder) {
  * @brief
  *
  */
-void Client::sendTagInfPacket() {
+void Client::sendGameModeInfPacket() {
     if (!sInstance) {
         Logger::log("Static Instance is Null!\n");
         return;
@@ -585,25 +584,11 @@ void Client::sendTagInfPacket() {
 
     sead::ScopedCurrentHeapSetter setter(sInstance->mHeap);
 
-    HideAndSeekMode* hsMode = GameModeManager::instance()->getMode<HideAndSeekMode>();
+    Packet* gmPacket = GameModeManager::createModePacket();
 
-    if (!GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)) {
-        Logger::log("State is not Hide and Seek!\n");
-        return;
+    if (gmPacket) {
+        sInstance->mSocket->queuePacket(gmPacket);
     }
-
-    HideAndSeekInfo* curInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
-
-    TagInf* packet = new TagInf();
-    packet->mUserID    = sInstance->mUserID;
-    packet->isIt       = hsMode->isPlayerIt() && hsMode->isModeActive();
-    packet->seconds    = curInfo->mHidingTime.mSeconds;
-    packet->minutes    = curInfo->mHidingTime.mMinutes;
-    packet->updateType = static_cast<TagUpdateType>(TagUpdateType::STATE | TagUpdateType::TIME);
-
-    sInstance->mSocket->queuePacket(packet);
-
-    sInstance->lastTagInfPacket = *packet;
 }
 
 /**
@@ -672,10 +657,8 @@ void Client::resendInitPackets() {
         mSocket->queuePacket(&lastGameInfPacket);
     }
 
-    // TagInfPacket
-    if (lastTagInfPacket.mUserID == mUserID) {
-        mSocket->queuePacket(&lastTagInfPacket);
-    }
+    // GameModeInfPacket
+    sendGameModeInfPacket();
 
     // CaptureInfPacket
     if (lastCaptureInfPacket.mUserID == mUserID) {
@@ -887,41 +870,6 @@ void Client::updateGameInfo(GameInf* packet) {
  *
  * @param packet
  */
-void Client::updateTagInfo(TagInf* packet) {
-    // if the packet is for our player, edit info for our player
-    if (packet->mUserID == mUserID && GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)) {
-
-        HideAndSeekMode* mMode   = GameModeManager::instance()->getMode<HideAndSeekMode>();
-        HideAndSeekInfo* curInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
-
-        if (packet->updateType & TagUpdateType::STATE) {
-            mMode->setPlayerTagState(packet->isIt);
-        }
-
-        if (packet->updateType & TagUpdateType::TIME) {
-            curInfo->mHidingTime.mSeconds = packet->seconds;
-            curInfo->mHidingTime.mMinutes = packet->minutes;
-        }
-
-        return;
-    }
-
-    PuppetInfo* curInfo = findPuppetInfo(packet->mUserID, false);
-
-    if (!curInfo) {
-        return;
-    }
-
-    curInfo->isIt    = packet->isIt;
-    curInfo->seconds = packet->seconds;
-    curInfo->minutes = packet->minutes;
-}
-
-/**
- * @brief
- *
- * @param packet
- */
 void Client::sendToStage(ChangeStagePacket* packet) {
     if (mSceneInfo && mSceneInfo->mSceneObjHolder) {
         GameDataHolderAccessor accessor(mSceneInfo->mSceneObjHolder);
@@ -1029,7 +977,7 @@ PuppetInfo* Client::findPuppetInfo(const nn::account::Uid& id, bool isFindAvaila
     PuppetInfo* firstAvailable = nullptr;
 
     for (size_t i = 0; i < (size_t)getMaxPlayerCount() - 1; i++) {
-        PuppetInfo* curInfo = mPuppetInfoArr[i];
+        PuppetInfo* curInfo = instance()->mPuppetInfoArr[i];
 
         if (curInfo->playerID == id) {
             return curInfo;
@@ -1118,7 +1066,7 @@ PuppetInfo* Client::getLatestInfo() {
 
 /**
  * @brief
- *
+ * Returns Puppet Info based off index in array.
  * @param idx
  * @return PuppetInfo*
  */
@@ -1132,6 +1080,27 @@ PuppetInfo* Client::getPuppetInfo(int idx) {
         }
 
         Logger::log("Attempting to Access Puppet Out of Bounds! Value: %d\n", idx);
+    }
+    return nullptr;
+}
+
+/**
+ * @brief
+ * Returns Puppet Info based off player name.
+ * @param idx
+ * @return PuppetInfo*
+ */
+PuppetInfo* Client::getPuppetInfo(const char* name) {
+    if (sInstance) {
+        for (size_t i = 0; i < (size_t)getMaxPlayerCount(); i++) {
+            PuppetInfo* curInfo = sInstance->mPuppetInfoArr[i];
+
+            if (curInfo && al::isEqualString(curInfo->puppetName, name)) {
+                return curInfo;
+            }
+        }
+
+        Logger::log("Unable to find Puppet with Name: %s\n", name);
     }
     return nullptr;
 }

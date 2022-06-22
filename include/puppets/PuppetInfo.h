@@ -10,11 +10,14 @@
 #include "sead/math/seadVector.h"
 #include "sead/math/seadQuat.h"
 
+#include "server/gamemode/GameMode.hpp"
+
 struct PuppetInfo {
     // General Puppet Info
     nn::account::Uid playerID;
     char             puppetName[0x10] = {}; // max user account name size is 10 chars, so this could go down to 0xB
     bool             isConnected      = false;
+    GameMode         gameMode         = GameMode::NONE;
 
     // Puppet Translation Info
     sead::Vector3f playerPos = sead::Vector3f(0.f,0.f,0.f);
