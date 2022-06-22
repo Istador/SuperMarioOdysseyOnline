@@ -26,8 +26,9 @@ class SocketClient : public SocketBase {
     public:
         SocketClient(const char* name, sead::Heap* heap, Client* client);
         nn::Result init(const char* ip, u16 port) override;
-        bool tryReconnect();
+        bool tryReconnect() override;
         bool closeSocket() override;
+        Packet* tryGetPacket() override;
 
         bool startThreads();
         void endThreads();
@@ -41,8 +42,6 @@ class SocketClient : public SocketBase {
 
         void sendFunc();
         void recvFunc();
-
-        Packet* tryGetPacket(sead::MessageQueue::BlockType blockType = sead::MessageQueue::BlockType::Blocking);
 
         void printPacket(Packet* packet);
         bool isConnected() { return socket_log_state == SOCKET_LOG_CONNECTED; }

@@ -3,24 +3,27 @@
 #include "al/async/FunctorV0M.hpp"
 #include "al/util.hpp"
 #include "al/util/ControllerUtil.h"
+#include "al/util/LiveActorUtil.h"
 #include "game/GameData/GameDataHolderAccessor.h"
 #include "game/Layouts/CoinCounter.h"
 #include "game/Layouts/MapMini.h"
 #include "game/Player/PlayerActorBase.h"
 #include "game/Player/PlayerActorHakoniwa.h"
 #include "heap/seadHeapMgr.h"
-#include "layouts/HideAndSeekIcon.h"
 #include "logger.hpp"
+#include "math/seadVector.h"
+#include "packets/Packet.h"
 #include "rs/util.hpp"
-#include "server/gamemode/GameModeBase.hpp"
+#include "rs/util/PlayerUtil.h"
 #include "server/Client.hpp"
-#include "server/gamemode/GameModeTimer.hpp"
 #include <heap/seadHeap.h>
+#include <math.h>
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/gamemode/GameModeFactory.hpp"
 
 #include "basis/seadNew.h"
 #include "server/hns/HideAndSeekConfigMenu.hpp"
+#include "server/hns/HideAndSeekPacket.hpp"
 
 HideAndSeekMode::HideAndSeekMode(const char* name) : GameModeBase(name) {}
 
@@ -30,7 +33,9 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
     mCurScene       = (StageScene*)info.mScene;
     mPuppetHolder   = info.mPuppetHolder;
 
-    GameModeInfoBase* curGameInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+    GameModeInfoBase* curGameInfo = GameModeManager::instance()->getInfo<GameModeInfoBase>();
+
+    sead::ScopedCurrentHeapSetter heapSetter(GameModeManager::instance()->getHeap());
 
     if (curGameInfo) {
         Logger::log("Gamemode info found: %s %s\n", GameModeFactory::getModeString(curGameInfo->mMode), GameModeFactory::getModeString(info.mMode));
@@ -39,6 +44,7 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
     }
 
     if (curGameInfo && curGameInfo->mMode == mMode) {
+        sead::ScopedCurrentHeapSetter heapSetter(GameModeManager::getSceneHeap());
         mInfo = (HideAndSeekInfo*)curGameInfo;
         mModeTimer = new GameModeTimer(mInfo->mHidingTime);
         Logger::log("Reinitialized timer with time %d:%.2d\n", mInfo->mHidingTime.mMinutes, mInfo->mHidingTime.mSeconds);
@@ -52,6 +58,8 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
         mModeTimer = new GameModeTimer();
     }
 
+    sead::ScopedCurrentHeapSetter heapSetterr(GameModeManager::getSceneHeap());
+
     mModeLayout = new HideAndSeekIcon("HideAndSeekIcon", *info.mLayoutInitInfo);
 
     mModeLayout->showSeeking();
@@ -59,10 +67,85 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
     mModeTimer->disableTimer();
 }
 
+void HideAndSeekMode::processPacket(Packet* _packet) {
+    HideAndSeekPacket* packet     = (HideAndSeekPacket*)_packet;
+    HnSUpdateType      updateType = packet->updateType();
+
+    // if the packet is for our player, edit info for our player
+    if (packet->mUserID == Client::getClientId()) {
+        if (updateType & HnSUpdateType::TIME) {
+            mInfo->mHidingTime.mMilliseconds = 0.0;
+            mInfo->mHidingTime.mSeconds      = packet->seconds;
+            mInfo->mHidingTime.mMinutes      = packet->minutes % 60;
+            mInfo->mHidingTime.mHours        = packet->minutes / 60;
+            mModeTimer->setTime(mInfo->mHidingTime);
+        }
+
+        if (updateType & HnSUpdateType::STATE) {
+            updateTagState(packet->isIt);
+        } else if (updateType & HnSUpdateType::TIME) {
+            Client::sendGameModeInfPacket();
+        }
+
+        return;
+    }
+
+    PuppetInfo* other = Client::findPuppetInfo(packet->mUserID, false);
+    if (!other) {
+        return;
+    }
+
+    if (updateType & HnSUpdateType::STATE) {
+        other->isIt = packet->isIt;
+    }
+
+    if (updateType & HnSUpdateType::TIME) {
+        other->seconds = packet->seconds;
+        other->minutes = packet->minutes;
+    }
+}
+
+Packet* HideAndSeekMode::createPacket() {
+    if (!isModeActive()) {
+        DisabledGameModeInf* packet = new DisabledGameModeInf(Client::getClientId());
+        return packet;
+    }
+
+    HideAndSeekPacket* packet = new HideAndSeekPacket();
+    packet->mUserID    = Client::getClientId();
+    packet->isIt       = isPlayerIt();
+    packet->seconds    = mInfo->mHidingTime.mSeconds;
+    packet->minutes    = mInfo->mHidingTime.mMinutes + mInfo->mHidingTime.mHours * 60;
+    packet->setUpdateType(static_cast<HnSUpdateType>(HnSUpdateType::STATE | HnSUpdateType::TIME));
+    return packet;
+}
+
 void HideAndSeekMode::begin() {
-    mModeLayout->appear();
+    unpause();
 
     mIsFirstFrame = true;
+    mInvulnTime   = 0.0f;
+
+    GameModeBase::begin();
+}
+
+void HideAndSeekMode::end() {
+    pause();
+
+    GameModeBase::end();
+}
+
+void HideAndSeekMode::pause() {
+    GameModeBase::pause();
+
+    mModeLayout->tryEnd();
+    mModeTimer->disableTimer();
+}
+
+void HideAndSeekMode::unpause() {
+    GameModeBase::unpause();
+
+    mModeLayout->appear();
 
     if (mInfo->mIsPlayerIt) {
         mModeTimer->disableTimer();
@@ -71,45 +154,6 @@ void HideAndSeekMode::begin() {
         mModeTimer->enableTimer();
         mModeLayout->showHiding();
     }
-
-    CoinCounter*                   coinCollect  = mCurScene->mSceneLayout->mCoinCollectLyt;
-    CoinCounter*                   coinCounter  = mCurScene->mSceneLayout->mCoinCountLyt;
-    MapMini*                       compass      = mCurScene->mSceneLayout->mMapMiniLyt;
-    al::SimpleLayoutAppearWaitEnd* playGuideLyt = mCurScene->mSceneLayout->mPlayGuideMenuLyt;
-
-    mInvulnTime = 0;
-
-    if (coinCounter->mIsAlive)  { coinCounter->tryEnd(); }
-    if (coinCollect->mIsAlive)  { coinCollect->tryEnd(); }
-    if (compass->mIsAlive)      { compass->end();        }
-    if (playGuideLyt->mIsAlive) { playGuideLyt->end();   }
-
-    GameModeBase::begin();
-
-    Client::sendTagInfPacket();
-}
-
-void HideAndSeekMode::end() {
-
-    mModeLayout->tryEnd();
-
-    mModeTimer->disableTimer();
-
-    CoinCounter*                   coinCollect  = mCurScene->mSceneLayout->mCoinCollectLyt;
-    CoinCounter*                   coinCounter  = mCurScene->mSceneLayout->mCoinCountLyt;
-    MapMini*                       compass      = mCurScene->mSceneLayout->mMapMiniLyt;
-    al::SimpleLayoutAppearWaitEnd* playGuideLyt = mCurScene->mSceneLayout->mPlayGuideMenuLyt;
-
-    mInvulnTime = 0.0f;
-
-    if (!coinCounter->mIsAlive)  { coinCounter->tryStart();  }
-    if (!coinCollect->mIsAlive)  { coinCollect->tryStart();  }
-    if (!compass->mIsAlive)      { compass->appearSlideIn(); }
-    if (!playGuideLyt->mIsAlive) { playGuideLyt->appear();   }
-
-    GameModeBase::end();
-
-    Client::sendTagInfPacket();
 }
 
 void HideAndSeekMode::update() {
@@ -124,7 +168,13 @@ void HideAndSeekMode::update() {
         mIsFirstFrame = false;
     }
 
-    if (!mInfo->mIsPlayerIt) {
+    if (rs::isActiveDemoPlayerPuppetable(playerBase)) {
+        mInvulnTime = 0.0f; // if player is in a demo, reset invuln time
+    }
+
+    if (mInfo->mIsPlayerIt) {
+        mModeTimer->timerControl();
+    } else {
         if (mInvulnTime < 5) {
             mInvulnTime += Time::deltaTime;
         } else if (playerBase) {
@@ -139,7 +189,12 @@ void HideAndSeekMode::update() {
                     continue;
                 }
 
-                float pupDist = al::calcDistance(playerBase, other->playerPos); // TODO: remove distance calculations and use hit sensors to determine this
+                if (other->gameMode != mMode && other->gameMode != GameMode::LEGACY) {
+                    continue;
+                }
+
+                sead::Vector3f offset = sead::Vector3f(0.0f, 80.0f, 0.0f);
+                float pupDist = vecDistance(other->playerPos + offset, al::getTrans(playerBase) + offset); // TODO: remove distance calculations and use hit sensors to determine this
 
                 if (pupDist < 200.f && ((PlayerActorHakoniwa*)playerBase)->mDimKeeper->is2DModel == other->is2D) {
                     if (!PlayerFunction::isPlayerDeadStatus(playerBase)) {
@@ -194,6 +249,22 @@ void HideAndSeekMode::update() {
     mInfo->mHidingTime = mModeTimer->getTime();
 }
 
+bool HideAndSeekMode::showNameTag(PuppetInfo* other) {
+    return (
+        (other->gameMode != mMode && other->gameMode != GameMode::LEGACY)
+        || (isPlayerIt() && other->isIt)
+    );
+}
+
+void HideAndSeekMode::debugMenuControls(sead::TextWriter* gTextWriter) {
+    gTextWriter->printf("- L + ← | Enable/disable Hide & Seek [H&S]\n");
+    gTextWriter->printf("- [H&S] ↑ | Switch between hider and seeker\n");
+    gTextWriter->printf("- [H&S][Hider] ← | Decrease hiding time\n");
+    gTextWriter->printf("- [H&S][Hider] → | Increase hiding time\n");
+    gTextWriter->printf("- [H&S][Hider] L + ↓ | Reset hiding time\n");
+    gTextWriter->printf("- [H&S][Gravity] L + → | Toggle gravity camera\n");
+}
+
 void HideAndSeekMode::updateTagState(bool isSeeking) {
     mInfo->mIsPlayerIt = isSeeking;
 
@@ -206,5 +277,15 @@ void HideAndSeekMode::updateTagState(bool isSeeking) {
         mInvulnTime = 0;
     }
 
-    Client::sendTagInfPacket();
+    Client::sendGameModeInfPacket();
+}
+
+void HideAndSeekMode::onBorderPullBackFirstStep(al::LiveActor* actor) {
+    if (isUseGravity()) {
+        killMainPlayer(actor);
+    }
+}
+
+void HideAndSeekMode::createCustomCameraTicket(al::CameraDirector* director) {
+    mTicket = director->createCameraFromFactory("CameraPoserCustom", nullptr, 0, 5, sead::Matrix34f::ident);
 }

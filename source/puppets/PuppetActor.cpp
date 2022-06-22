@@ -19,7 +19,6 @@
 #include "math/seadVector.h"
 #include "server/gamemode/GameModeManager.hpp"
 #include "server/gamemode/GameModeBase.hpp"
-#include "server/hns/HideAndSeekMode.hpp"
 
 static const char* subActorNames[] = {
     "顔", // Face
@@ -184,8 +183,8 @@ void PuppetActor::control() {
         }
 
         if (mNameTag) {
-            if (GameModeManager::instance()->isModeAndActive(GameMode::HIDEANDSEEK)) {
-                mNameTag->mIsAlive = GameModeManager::instance()->getMode<HideAndSeekMode>()->isPlayerIt() && mInfo->isIt;
+            if (GameModeManager::instance()->isActive()) {
+                mNameTag->mIsAlive = GameModeManager::instance()->getMode<GameModeBase>()->showNameTag(mInfo);
             } else if (!mNameTag->mIsAlive) {
                 mNameTag->appear();
             }
@@ -229,12 +228,22 @@ void PuppetActor::makeActorDead() {
 }
 
 void PuppetActor::attackSensor(al::HitSensor* source, al::HitSensor* target) {
+    // prevent normal attack behavior if gamemode requires custom behavior
+    if (GameModeManager::tryAttackPuppetSensor(source, target)) {
+        return;
+    }
+
     if (!al::sendMsgPush(target, source)) {
         rs::sendMsgPushToPlayer(target, source);
+        rs::sendMsgPlayerDisregardTargetMarker(target, source);
     }
 }
 
 bool PuppetActor::receiveMsg(const al::SensorMsg* msg, al::HitSensor* source, al::HitSensor* target) {
+    // try to use gamemode recieve logic, otherwise fallback to default behavior
+    if (GameModeManager::tryReceivePuppetMsg(msg, source, target)) {
+        return true;
+    }
 
     if ((al::isMsgPlayerTrampleReflect(msg) || rs::isMsgPlayerAndCapObjHipDropReflectAll(msg)) && al::isSensorName(target, "Body")) {
         rs::requestHitReactionToAttacker(msg, target, source);
