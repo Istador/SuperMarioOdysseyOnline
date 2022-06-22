@@ -10,6 +10,7 @@
 #include "nn/socket.h"
 #include "packets/Packet.h"
 #include "packets/UdpPacket.h"
+#include "packets/GameModeInf.h"
 #include "server/Client.hpp"
 #include "thread/seadMessageQueue.h"
 #include "types.h"
@@ -125,14 +126,9 @@ nn::Result SocketClient::init(const char* ip, u16 port) {
     if (initPacket.conType == ConnectionTypes::RECONNECT) {
         client->resendInitPackets();
     } else {
-        // empty TagInf
-        TagInf tagInf;
-        tagInf.mUserID = initPacket.mUserID;
-        tagInf.isIt = false;
-        tagInf.minutes = 0;
-        tagInf.seconds = 0;
-        tagInf.updateType = static_cast<TagUpdateType>(TagUpdateType::STATE | TagUpdateType::TIME);
-        send(&tagInf);
+        // empty Gamemode
+        DisabledGameModeInf* tagInf = new (mHeap) DisabledGameModeInf(initPacket.mUserID);
+        send(tagInf);
 
         // empty CaptureInf
         CaptureInf capInf;
@@ -554,8 +550,8 @@ bool SocketClient::trySendQueue() {
     return successful;
 }
 
-Packet* SocketClient::tryGetPacket(sead::MessageQueue::BlockType blockType) {
-    return socket_log_state == SOCKET_LOG_CONNECTED ? (Packet*)mRecvQueue.pop(blockType) : nullptr;
+Packet* SocketClient::tryGetPacket() {
+    return socket_log_state == SOCKET_LOG_CONNECTED ? (Packet*)mRecvQueue.pop(sead::MessageQueue::BlockType::Blocking) : nullptr;
 }
 
 void SocketClient::clearMessageQueues() {

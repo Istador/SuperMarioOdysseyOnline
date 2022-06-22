@@ -1,10 +1,20 @@
 #pragma once
 
+#include <format>
+#include <string>
+
 struct GameTime {
     float mMilliseconds = 0;
     int   mSeconds      = 0;
     int   mMinutes      = 0;
     int   mHours        = 0;
+
+    const std::string to_string() {
+        if (mHours > 0) {
+            return std::format("{:01}:{:02}:{:02}", mHours, mMinutes, mSeconds);
+        }
+        return std::format("{:02}:{:02}", mMinutes, mSeconds);
+    }
 };
 
 class GameModeTimer {

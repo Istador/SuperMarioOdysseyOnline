@@ -34,7 +34,7 @@
 #include "game/GameData/GameDataFunction.h"
 
 #include "heap/seadExpHeap.h"
-#include "layouts/HideAndSeekIcon.h"
+#include "server/hns/HideAndSeekIcon.h"
 #include "rs/util.hpp"
 
 #include "sead/heap/seadDisposer.h"
@@ -100,7 +100,7 @@ class Client {
         static void sendGameInfPacket(GameDataHolderAccessor holder);
         static void sendCostumeInfPacket(const char* body, const char* cap);
         static void sendShineCollectPacket(int shineId);
-        static void sendTagInfPacket();
+        static void sendGameModeInfPacket();
         static void sendCaptureInfPacket(const PlayerActorHakoniwa* player);
         void resendInitPackets();
 
@@ -122,6 +122,9 @@ class Client {
         static PuppetActor* getPuppet(int idx);
 
         static PuppetInfo* getPuppetInfo(int idx);
+        static PuppetInfo* getPuppetInfo(const char* name);
+
+        static PuppetInfo* findPuppetInfo(const nn::account::Uid& id, bool isFindAvailable);
 
         static PuppetInfo* getLatestInfo();
 
@@ -195,7 +198,6 @@ class Client {
         PlayerInf*  getLastPlayerInfPacket()  { return &this->lastPlayerInfPacket;  }
         GameInf*    getLastGameInfPacket()    { return &this->lastGameInfPacket;    }
         CostumeInf* getLastCostumeInfPacket() { return &this->lastCostumeInfPacket; }
-        TagInf*     getLastTagInfPacket()     { return &this->lastTagInfPacket;     }
         CaptureInf* getLastCaptureInfPacket() { return &this->lastCaptureInfPacket; }
 
     private:
@@ -205,14 +207,11 @@ class Client {
         void updateCostumeInfo(CostumeInf* packet);
         void updateShineInfo(ShineCollect* packet);
         void updatePlayerConnect(PlayerConnect* packet);
-        void updateTagInfo(TagInf* packet);
         void updateCaptureInfo(CaptureInf* packet);
         void sendToStage(ChangeStagePacket* packet);
         void sendUdpHolePunch();
         void sendUdpInit();
         void disconnectPlayer(PlayerDC* packet);
-
-        PuppetInfo* findPuppetInfo(const nn::account::Uid& id, bool isFindAvailable);
 
         bool startConnection();
 
@@ -241,7 +240,6 @@ class Client {
         GameInf lastGameInfPacket = GameInf();
         GameInf emptyGameInfPacket = GameInf();
         CostumeInf lastCostumeInfPacket = CostumeInf();
-        TagInf lastTagInfPacket = TagInf();
         CaptureInf lastCaptureInfPacket = CaptureInf();
 
         Keyboard* mKeyboard = nullptr; // keyboard for setting server IP
