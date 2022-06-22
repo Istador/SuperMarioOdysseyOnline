@@ -51,11 +51,13 @@ struct PuppetInfo {
     bool           isCapThrow           = false;
     bool           isHoldThrow          = false;
 
-    // Hide and Seek Gamemode Info
+    // Hide and Seek & Sardines Gamemode Info
     bool isIt    = false;
     u8   seconds = 0;
     u16  minutes = 0;
 
     inline bool hnsIsSeeking() const { return  isIt; }
     inline bool hnsIsHiding()  const { return !isIt; }
+    inline bool snhIsPack()    const { return  isIt; }
+    inline bool snhIsAlone()   const { return !isIt; }
 };
