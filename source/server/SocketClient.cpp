@@ -11,6 +11,7 @@
 #include "packets/Packet.h"
 #include "packets/UdpPacket.h"
 #include "server/Client.hpp"
+#include "server/hns/HideAndSeekPacket.hpp"
 #include "thread/seadMessageQueue.h"
 #include "types.h"
 
@@ -125,13 +126,14 @@ nn::Result SocketClient::init(const char* ip, u16 port) {
     if (initPacket.conType == ConnectionTypes::RECONNECT) {
         client->resendInitPackets();
     } else {
-        // empty TagInf
-        TagInf tagInf;
+        // empty Gamemode
+        HideAndSeekPacket tagInf;
         tagInf.mUserID = initPacket.mUserID;
         tagInf.isIt = false;
         tagInf.minutes = 0;
         tagInf.seconds = 0;
-        tagInf.updateType = static_cast<TagUpdateType>(TagUpdateType::STATE | TagUpdateType::TIME);
+        tagInf.setGameMode(GameMode::LEGACY);
+        tagInf.setUpdateType(static_cast<HnSUpdateType>(HnSUpdateType::STATE | HnSUpdateType::TIME));
         send(&tagInf);
 
         // empty CaptureInf
@@ -554,8 +556,8 @@ bool SocketClient::trySendQueue() {
     return successful;
 }
 
-Packet* SocketClient::tryGetPacket(sead::MessageQueue::BlockType blockType) {
-    return socket_log_state == SOCKET_LOG_CONNECTED ? (Packet*)mRecvQueue.pop(blockType) : nullptr;
+Packet* SocketClient::tryGetPacket() {
+    return socket_log_state == SOCKET_LOG_CONNECTED ? (Packet*)mRecvQueue.pop(sead::MessageQueue::BlockType::Blocking) : nullptr;
 }
 
 void SocketClient::clearMessageQueues() {

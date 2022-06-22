@@ -6,12 +6,12 @@
 #include "al/util.hpp"
 #include "server/gamemode/GameModeBase.hpp"
 #include "server/gamemode/GameModeInfoBase.hpp"
+#include "server/gamemode/GameModeInitInfo.hpp"
 #include "server/gamemode/modifiers/ModeModifierBase.hpp"
 
 class GameModeManager {
     SEAD_SINGLETON_DISPOSER(GameModeManager)
     GameModeManager();
-    ~GameModeManager();
 
 public:
     void setMode(GameMode mode);
@@ -19,14 +19,23 @@ public:
     void begin();
     void end();
     void update();
+    void pause();
+    void unpause();
 
     GameMode getGameMode() const { return mCurMode; }
+    GameMode getNextGameMode() const { return mNextMode; }
     template<class T> T* getMode() const { return static_cast<T*>(mCurModeBase); }
     template<class T> T* getInfo() const { return static_cast<T*>(mModeInfo); }
     void setInfo(GameModeInfoBase* info) { mModeInfo = info; }
 
-    template<class T>
-    T* createModeInfo();
+    static bool tryReceivePuppetMsg(const al::SensorMsg* msg, al::HitSensor* source, al::HitSensor* target);
+    static bool tryReceiveCapMsg(const al::SensorMsg* msg, al::HitSensor* source, al::HitSensor* target);
+    static bool tryAttackPuppetSensor(al::HitSensor* source, al::HitSensor* target);
+    static bool tryAttackCapSensor(al::HitSensor* source, al::HitSensor* target);
+    static void processModePacket(Packet* packet);
+    static Packet* createModePacket();
+
+    template<class T> T* createModeInfo();
 
     sead::Heap* getHeap() { return mHeap; }
     static sead::Heap* getSceneHeap() { return al::getSceneHeap(); }
@@ -36,7 +45,9 @@ public:
     bool isMode(GameMode mode) const { return mCurMode == mode; }
     bool isActive() const { return mActive; }
     bool isModeAndActive(GameMode mode) const { return isMode(mode) && isActive(); }
+    bool isModeRequireUI();
     bool isPaused() const { return mPaused; }
+    bool wasSceneTrans() const { return mWasSceneTrans; }
 
 private:
     sead::Heap* mHeap = nullptr;
@@ -45,14 +56,17 @@ private:
     bool mPaused        = false;
     bool mWasSceneTrans = false;
     bool mWasSetMode    = false;
+    bool mWasPaused     = false;
 
     GameMode          mCurMode      = GameMode::NONE;
+    GameMode          mNextMode     = GameMode::NONE;
     GameModeBase*     mCurModeBase  = nullptr;
     GameModeInfoBase* mModeInfo     = nullptr;
     GameModeInitInfo* mLastInitInfo = nullptr;
     ModeModifierBase* mCurModifier  = nullptr;
 };
 
+// TODO: moving this method into the .cpp file crashes the game on stage enter
 template<class T>
 T* GameModeManager::createModeInfo() {
     sead::ScopedCurrentHeapSetter heapSetter(mHeap);
