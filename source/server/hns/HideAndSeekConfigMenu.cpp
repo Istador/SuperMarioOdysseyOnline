@@ -2,7 +2,7 @@
 #include <cmath>
 #include "logger.hpp"
 #include "server/gamemode/GameModeManager.hpp"
-#include "server/hns/HideAndSeekMode.hpp"
+#include "server/hns/HideAndSeekInfo.hpp"
 #include "server/Client.hpp"
 
 HideAndSeekConfigMenu::HideAndSeekConfigMenu() : GameModeConfigMenu() {
