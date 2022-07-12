@@ -44,7 +44,7 @@ void updatePlayerInfo(GameDataHolderAccessor holder, PlayerActorHakoniwa *p1) {
     }
 
     pInfSendTimer++;
-    gameInfSendTimer++;
+    gameInfSendTimer++
 }
 
 // ------------- Hooks -------------
