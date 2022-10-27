@@ -37,7 +37,7 @@ StageSceneStateServerConfig::StageSceneStateServerConfig(const char *name, al::S
     mMainOptions = new SimpleLayoutMenu("ServerConfigMenu", "OptionSelect", initInfo, 0, false);
     mMainOptionsList = new CommonVerticalList(mMainOptions, initInfo, true);
 
-    al::setPaneString(mMainOptions, "TxtOption", u"Server Configuration", 0);
+    al::setPaneString(mMainOptions, "TxtOption", u"SMOO Mod Menu", 0);
 
     mMainOptionsList->unkInt1 = 1;
 
