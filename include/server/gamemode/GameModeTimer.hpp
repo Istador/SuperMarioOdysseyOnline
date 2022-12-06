@@ -31,15 +31,27 @@ class GameModeTimer {
         void enableControl()  { mIsUseControl = true; }
         void disableControl() { mIsUseControl = false; }
 
+        void setTimerDirection(bool isCountUp) { mIsCountUp = isCountUp; }
+
         void setTime(float milli, int seconds, int minutes, int hours);
         void setTime(GameTime const& time);
 
         void resetTime() { setTime(0, 0, 0, 0); }
 
+        bool isEnabled()        { return mIsEnabled; }
         float getMilliseconds() { return mTime.mMilliseconds; }
         int getSeconds()        { return mTime.mSeconds; }
         int getMinutes()        { return mTime.mMinutes; }
         int getHours()          { return mTime.mHours; }
+
+        float getTimeCombined() {
+            return (
+                (float)mTime.mSeconds
+                + ((float)mTime.mMinutes * 60.0f)
+                + ((float)mTime.mHours * 3600.0f)
+                + (mIsCountUp ? mTime.mMilliseconds : -mTime.mMilliseconds)
+            );
+        }
 
         GameTime  getTime()    { return mTime; }
         GameTime* getTimePtr() { return &mTime; }
