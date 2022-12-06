@@ -18,6 +18,8 @@
 #include "helpers.hpp"
 #include "algorithms/CaptureTypes.h"
 
+#include "server/freeze-tag/FreezePlayerBlock.h"
+
 class PuppetActor : public al::LiveActor {
     public:
         PuppetActor(const char* name);
@@ -86,6 +88,8 @@ class PuppetActor : public al::LiveActor {
         bool mIsCaptureModel = false;
 
         float mClosingSpeed = 0;
+
+        FreezePlayerBlock* mFreezeTagIceBlock = nullptr;
 };
 
 PlayerCostumeInfo* initMarioModelPuppet(

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include "algorithms/PlayerAnims.h"
 #include "packets/Packet.h"
 
@@ -60,4 +61,19 @@ struct PuppetInfo {
     inline bool hnsIsHiding()  const { return !isIt; }
     inline bool snhIsPack()    const { return  isIt; }
     inline bool snhIsAlone()   const { return !isIt; }
+
+    // Freeze Tag Gamemode Info
+    uint16_t freezeTagScore       = 0;
+    bool     isFreezeInRound      = false;
+    bool     isFreezeTagRunner    = true;
+    bool     isFreezeTagFreeze    = false;
+    bool     isFreezeTagFallenOff = false; // When runner falls off and is automatically frozen, this flag is set
+    float    freezeIconSize       = 0.f;
+
+    inline uint16_t ftGetScore()     const { return  freezeTagScore;       }
+    inline bool     ftIsRunner()     const { return  isFreezeTagRunner;    }
+    inline bool     ftIsChaser()     const { return !isFreezeTagRunner;    }
+    inline bool     ftIsFrozen()     const { return  isFreezeTagFreeze;    }
+    inline bool     ftIsUnfrozen()   const { return !isFreezeTagFreeze;    }
+    inline bool     ftHasFallenOff() const { return  isFreezeTagFallenOff; }
 };

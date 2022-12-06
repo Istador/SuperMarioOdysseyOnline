@@ -94,6 +94,11 @@ void PuppetActor::init(al::ActorInitInfo const& initInfo) {
 
     al::validateClipping(normalModel);
     al::validateClipping(normal2DModel);
+
+    if (GameModeManager::instance()->isMode(GameMode::FREEZETAG)) {
+        mFreezeTagIceBlock = new FreezePlayerBlock("PuppetIceBlock");
+        mFreezeTagIceBlock->init(initInfo);
+    }
 }
 
 void PuppetActor::initAfterPlacement() { al::LiveActor::initAfterPlacement(); }
@@ -106,6 +111,23 @@ void PuppetActor::initOnline(PuppetInfo* pupInfo) {
 
 void PuppetActor::movement() {
     al::LiveActor::movement();
+
+    if (mFreezeTagIceBlock) {
+        bool isAlive = al::isAlive(mFreezeTagIceBlock);
+        if (   mInfo->ftIsFrozen()
+            && mInfo->isConnected
+            && mInfo->isInSameStage
+        ) {
+            if (!isAlive) {
+                mFreezeTagIceBlock->appear();
+            }
+        } else if (isAlive && !al::isNerve(mFreezeTagIceBlock, &nrvFreezePlayerBlockDisappear)) {
+            mFreezeTagIceBlock->end();
+        }
+
+        al::setTrans(mFreezeTagIceBlock, mInfo->playerPos);
+        al::setQuat(mFreezeTagIceBlock, mInfo->playerRot);
+    }
 }
 
 void PuppetActor::calcAnim() {
@@ -228,6 +250,10 @@ void PuppetActor::makeActorDead() {
     }
 
     mPuppetCap->makeActorDead();
+
+    if (mFreezeTagIceBlock) {
+        mFreezeTagIceBlock->makeActorDead();
+    }
 
     al::LiveActor::makeActorDead();
 }
