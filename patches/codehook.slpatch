@@ -27,9 +27,9 @@ B59E28 B seadPrintHook  // sead::system::print
 
 41B4E4 BL setPlayerModel
 
-1B3F0C NOP        // disables call to open HTML viewer during first time odyssey flight
-1F2A2C MOV W0, #1 // patches checkpoint system to always allow warping
-216FAC MOV W0, #0 // disables AppearSwitchTimer's camera switch
+1B3F0C NOP                             // disables call to open HTML viewer during first time odyssey flight
+1F2998 B freezeIsCheckpointWarpAllowed // Patches checkpoint system to always allow warping, disable in freeze tag
+216FAC MOV W0, #0                      // disables AppearSwitchTimer's camera switch
 
 // Puppet Actor Setup
 4B5E30 B ProjectActorFactory // patches actor factory ctor with custom matching factory
@@ -68,7 +68,7 @@ B59E28 B seadPrintHook  // sead::system::print
     MOV X0, #0
     RET
 
-// Remap Snapshot to !L + Down
+// Remap Snapshot to !L + Down, disables snapshot mode in freeze tag
 577014 B comboBtnHook
 
 // Capture Syncing
@@ -132,3 +132,9 @@ B59E28 B seadPrintHook  // sead::system::print
 2609B4 MOV W0, #0 // Lake
 25FF74 MOV X0, #1 // Metro (open w/ doors)
 25FFAC MOV X0, #0 // Metro (open w/o doors) (not needed?)
+
+// Freeze tag hooks
+4272F0 BL freezeDeathArea            // Replaces functionality of death areas in freeze tag
+538A94 B  freezePlayerHitPointDamage // Reimplements the damage function, disabling it's functionality in Freeze Tag
+51B280 B  freezeKidsMode             // Forces kids mode to be enabled during Freeze Tag
+1CFBA0 BL freezeMoonHitboxDisable    // When mode enabled, disable hitboxes with moons to avoid softlocks
