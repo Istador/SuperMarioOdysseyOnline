@@ -8,4 +8,5 @@ enum GameMode : s8 {
     LEGACY = 0,
     HIDEANDSEEK = 1,
     SARDINE = 2,
+    FREEZETAG = 3,
 };
