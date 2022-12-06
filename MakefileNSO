@@ -38,6 +38,7 @@ SOURCES		:=  \
 			source/puppets  \
 			source/server/hns  \
 			source/server/sardines  \
+			source/server/freeze-tag  \
 			source/server/gamemode  \
 			source/server/gamemode/modifiers  \
 			source/server  \
