@@ -85,6 +85,10 @@ bool PuppetCapActor::receiveMsg(const al::SensorMsg* msg, al::HitSensor* sender,
         return true;
     }
 
+    if (GameModeManager::instance()->isModeAndActive(GameMode::FREEZETAG)) {
+        return false;
+    }
+
     if (al::isMsgPlayerDisregard(msg)) {
         return true;
     }

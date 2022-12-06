@@ -11,6 +11,7 @@
 #include "types.h"
 #include "UniqueObjInfo.h"
 #include "GameProgressData.h"
+#include "game/Player/PlayerHitPointData.h"
 
 #include "sead/math/seadVector.h"
 #include "sead/stream/seadStream.h"
@@ -34,8 +35,6 @@ class SequenceDemoSkipData;
 class HintPhotoData;
 class ShopTalkData;
 class RaceRecord;
-
-class PlayerHitPointData;
 
 class GameDataHolder;
 class ShineInfo;
@@ -266,7 +265,7 @@ class GameDataFile {
         void getPlayerStartId(void);
         void getStageNameNext(void);
         void getStageNameCurrent(void);
-        void getPlayerHitPointData(void);
+        PlayerHitPointData* getPlayerHitPointData() const;
         void getLastUpdateTime(void);
         void getPlayTimeTotal(void);
         int getMainScenarioNo(int) const;
@@ -444,7 +443,7 @@ class GameDataFile {
         void*                        qword810;
         bool                         byte818;
         void*                        qword820;
-        bool                         byte828;
+        bool                         mIsKidsMode;
         sead::PtrArrayImpl           sead__ptrarrayimpl830;
         u16                          word840;
         bool                         byte842;
