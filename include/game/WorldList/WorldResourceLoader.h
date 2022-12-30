@@ -19,17 +19,17 @@ class WorldResourceLoader : public al::HioNode {
         void requestLoadWorldResource(int);
         void createResourcePlayer(void);
         void tryDestroyWorldResourceOnlyCap(void);
-        void calcLoadPercent(void);
+        float calcLoadPercent(void) const;
         void getLoadWorldId(void);
         bool tryLoadResource(char const*, char const*, char const*);
         void loadWorldResource(int, int, bool, char const*);
         void calcWorldResourceHeapSize(void);
 
         al::AsyncFunctorThread* mResourceLoadThread;          // 0x08
-        sead::Heap*             mWorldResHeap      = nullptr; // 0x10
+        sead::Heap*             mSceneHeap         = nullptr; // 0x10
         sead::Heap*             mCapHeap           = nullptr; // 0x18
         sead::Heap*             mWaterfallHeap     = nullptr; // 0x20
-        int                     mCurWorld          = -1;      // 0x28
+        int                     mCurLoadedWorldId  = -1;      // 0x28
         int                     mCurScenario       = -1;      // 0x2C
         bool                    unkBool            = true;    // 0x30
         bool                    mIsCancelLoad      = true;    // 0x31
