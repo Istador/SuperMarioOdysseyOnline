@@ -275,14 +275,17 @@ bool SocketClient::stringToIPAddress(const char* str, in_addr* out) {
     }
 
     // get IPs via DNS
-    struct hostent *he = nn::socket::GetHostByName(str);
-    if (! he) { return false; }
+    struct addrinfo* result;
+    int error = nn::socket::GetAddrInfo(str, NULL, NULL, &result);
+    if (error != 0) { return false; }
 
-    // might give us multiple IP addresses, so pick the first one
-    struct in_addr **addr_list = (struct in_addr **) he->h_addr_list;
-    for (int i = 0 ; addr_list[i] != NULL ; i++) {
-        *out = *addr_list[i];
-        return true;
+    // might give us multiple IP addresses, so pick the first IPv4 one
+    struct addrinfo* res;
+    for (res = result; res != NULL; res = res->ai_next) {
+        if (res->ai_family == AF_INET) { // IPv4
+            *out = res->ai_addr->address;
+            return true;
+        }
     }
 
     return false;
