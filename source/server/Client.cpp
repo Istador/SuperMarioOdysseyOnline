@@ -71,15 +71,13 @@ Client::Client() {
  */
 void Client::init(al::LayoutInitInfo const &initInfo, GameDataHolderAccessor holder) {
 
-    mConnectionWait = new (mHeap) al::WindowConfirmWait("ServerWaitConnect", "WindowConfirmWait", initInfo);
-    
     mConnectStatus = new (mHeap) al::SimpleLayoutAppearWaitEnd("", "SaveMessage", initInfo, 0, false);
-
-    mConnectionWait->setTxtMessage(u"Connecting to Server.");
-    mConnectionWait->setTxtMessageConfirm(u"Failed to Connect!");
-
     al::setPaneString(mConnectStatus, "TxtSave", u"Connecting to Server.", 0);
     al::setPaneString(mConnectStatus, "TxtSaveSh", u"Connecting to Server.", 0);
+
+    mUIMessage = new (mHeap) al::WindowConfirmWait("ServerWaitConnect", "WindowConfirmWait", initInfo);
+    mUIMessage->setTxtMessage(u"a");
+    mUIMessage->setTxtMessageConfirm(u"b");
 
     mHolder = holder;
 
@@ -91,55 +89,17 @@ void Client::init(al::LayoutInitInfo const &initInfo, GameDataHolderAccessor hol
 /**
  * @brief starts client read thread
  * 
- * @return true if read thread was sucessfully started
+ * @return true if read thread was succesfully started
  * @return false if read thread was unable to start, or thread was already started.
  */
 bool Client::startThread() {
     if(mReadThread->isDone() ) {
         mReadThread->start();
-        Logger::log("Read Thread Sucessfully Started.\n");
+        Logger::log("Read Thread Successfully Started.\n");
         return true;
     }else {
         Logger::log("Read Thread has already started! Or other unknown reason.\n");
         return false;
-    }
-}
-
-/**
- * @brief restarts currently active connection to server
- * 
- */
-void Client::restartConnection() {
-
-    if (!sInstance) {
-        Logger::log("Static Instance is null!\n");
-        return;
-    }
-
-    sead::ScopedCurrentHeapSetter setter(sInstance->mHeap);
-
-    Logger::log("Sending Disconnect.\n");
-
-    PlayerDC *playerDC = new PlayerDC();
-
-    playerDC->mUserID = sInstance->mUserID;
-
-    sInstance->mSocket->queuePacket(playerDC);
-
-    if (sInstance->mSocket->closeSocket()) {
-        Logger::log("Sucessfully Closed Socket.\n");
-    }
-
-    sInstance->mConnectCount = 0;
-
-    sInstance->mIsConnectionActive = sInstance->mSocket->init(sInstance->mServerIP.cstr(), sInstance->mServerPort).isSuccess();
-
-    if(sInstance->mSocket->getLogState() == SOCKET_LOG_CONNECTED) {
-
-        Logger::log("Reconnect Sucessful!\n");
-
-    } else {
-        Logger::log("Reconnect Unsuccessful.\n");
     }
 }
 
@@ -179,7 +139,7 @@ bool Client::startConnection() {
 
     if (mIsConnectionActive) {
 
-        Logger::log("Sucessful Connection. Waiting to recieve init packet.\n");
+        Logger::log("Succesful Connection. Waiting to receive init packet.\n");
 
         bool waitingForInitPacket = true;
         // wait for client init packet
@@ -203,11 +163,13 @@ bool Client::startConnection() {
                 mHeap->free(curPacket);
 
             } else {
-                Logger::log("Recieve failed! Stopping Connection.\n");
+                Logger::log("Receive failed! Stopping Connection.\n");
                 mIsConnectionActive = false;
                 waitingForInitPacket = false;
             }
         }
+
+
     }
 
     return mIsConnectionActive;
@@ -293,6 +255,33 @@ bool Client::openKeyboardPort() {
     return isFirstConnect;
 }
 
+
+void Client::showUIMessage(const char16_t* msg) {
+    if (!sInstance) {
+        return;
+    }
+
+    sInstance->mUIMessage->setTxtMessageConfirm(msg);
+
+    al::hidePane(sInstance->mUIMessage, "Page01");  // hide A button prompt
+
+    if (!sInstance->mUIMessage->mIsAlive) {
+        sInstance->mUIMessage->appear();
+
+        sInstance->mUIMessage->playLoop();
+    }
+
+    al::startAction(sInstance->mUIMessage, "Confirm", "State");
+}
+
+void Client::hideUIMessage() {
+    if (!sInstance) {
+        return;
+    }
+
+    sInstance->mUIMessage->tryEnd();
+}
+
 /**
  * @brief main thread function for read thread, responsible for processing packets from server
  * 
@@ -326,7 +315,7 @@ void Client::readFunc() {
 
     while(mIsConnectionActive) {
 
-        Packet *curPacket = mSocket->tryGetPacket();  // will block until a packet has been recieved, or socket disconnected
+        Packet *curPacket = mSocket->tryGetPacket();  // will block until a packet has been received, or socket disconnected
 
         if (curPacket) {
 
@@ -361,6 +350,10 @@ void Client::readFunc() {
                     mSocket->send(&lastPlayerInfPacket);
                 if (lastCostumeInfPacket.mUserID == mUserID)
                     mSocket->send(&lastCostumeInfPacket);
+                if (lastTagInfPacket.mUserID == mUserID)
+                    mSocket->send(&lastTagInfPacket);
+                if (lastCaptureInfPacket.mUserID == mUserID)
+                    mSocket->send(&lastCaptureInfPacket);
 
                 break;
             case PacketType::COSTUMEINF:
@@ -386,6 +379,19 @@ void Client::readFunc() {
                 maxPuppets = initPacket->maxPlayers - 1;
                 break;
             }
+			case PacketType::UDPINIT: {
+				UdpInit* initPacket = (UdpInit*)curPacket;
+				Logger::log("Received udp init packet from server\n");
+				
+				sInstance->mSocket->setPeerUdpPort(initPacket->port);
+				sendUdpHolePunch();
+				sendUdpInit();
+				
+				break;
+			}
+			case PacketType::HOLEPUNCH: 
+				sendUdpHolePunch();
+				break;
             default:
                 Logger::log("Discarding Unknown Packet Type.\n");
                 break;
@@ -393,8 +399,8 @@ void Client::readFunc() {
 
             mHeap->free(curPacket);
 
-        }else { // if false, socket has errored or disconnected, so close the socket and end this thread.
-            Logger::log("Client Socket Encountered an Error! Errno: 0x%x\n", mSocket->socket_errno);
+        }else { // if false, socket has errored or disconnected, so restart the connection
+            Logger::log("Client Socket Encountered an Error, restarting connection! Errno: 0x%x\n", mSocket->socket_errno);
         }
 
     }
@@ -622,13 +628,15 @@ void Client::sendTagInfPacket() {
 
     packet->mUserID = sInstance->mUserID;
 
-    packet->isIt = hsMode->isPlayerIt();
+    packet->isIt = hsMode->isPlayerIt() && hsMode->isModeActive();
 
     packet->minutes = curInfo->mHidingTime.mMinutes;
     packet->seconds = curInfo->mHidingTime.mSeconds;
     packet->updateType = static_cast<TagUpdateType>(TagUpdateType::STATE | TagUpdateType::TIME);
 
     sInstance->mSocket->queuePacket(packet);
+
+    sInstance->lastTagInfPacket = *packet;
 }
 
 /**
@@ -673,12 +681,14 @@ void Client::sendCaptureInfPacket(const PlayerActorHakoniwa* player) {
         packet->mUserID = sInstance->mUserID;
         strcpy(packet->hackName, tryConvertName(player->mHackKeeper->getCurrentHackName()));
         sInstance->mSocket->queuePacket(packet);
+        sInstance->lastCaptureInfPacket = *packet;
         sInstance->isSentCaptureInf = true;
     } else if (!sInstance->isClientCaptured && sInstance->isSentCaptureInf) {
         CaptureInf *packet = new CaptureInf();
         packet->mUserID = sInstance->mUserID;
         strcpy(packet->hackName, "");
         sInstance->mSocket->queuePacket(packet);
+        sInstance->lastCaptureInfPacket = *packet;
         sInstance->isSentCaptureInf = false;
     }
 }
@@ -695,6 +705,16 @@ void Client::resendInitPackets() {
     // GameInfPacket
     if (lastGameInfPacket != emptyGameInfPacket) {
         mSocket->queuePacket(&lastGameInfPacket);
+    }
+
+    // TagInfPacket
+    if (lastTagInfPacket.mUserID == mUserID) {
+        mSocket->queuePacket(&lastTagInfPacket);
+    }
+
+    // CaptureInfPacket
+    if (lastCaptureInfPacket.mUserID == mUserID) {
+        mSocket->queuePacket(&lastCaptureInfPacket);
     }
 }
 
@@ -962,7 +982,45 @@ void Client::sendToStage(ChangeStagePacket* packet) {
         GameDataFunction::tryChangeNextStage(accessor, &info);
     }
 }
+/**
+ * @brief 
+ * Send a udp holepunch packet to the server
+ */
+void Client::sendUdpHolePunch() {
 
+    if (!sInstance) {
+        Logger::log("Static Instance is Null!\n");
+        return;
+    }
+
+    sead::ScopedCurrentHeapSetter setter(sInstance->mHeap);
+    
+    HolePunch *packet = new HolePunch();
+	
+    packet->mUserID = sInstance->mUserID;
+
+    sInstance->mSocket->queuePacket(packet);
+}
+/**
+ * @brief 
+ * Send a udp init packet to server
+ */
+void Client::sendUdpInit() {
+
+    if (!sInstance) {
+        Logger::log("Static Instance is Null!\n");
+        return;
+    }
+
+    sead::ScopedCurrentHeapSetter setter(sInstance->mHeap);
+    
+    UdpInit *packet = new UdpInit();
+	
+    packet->mUserID = sInstance->mUserID;
+	packet->port = sInstance->mSocket->getLocalUdpPort();
+	
+    sInstance->mSocket->queuePacket(packet);
+}
 /**
  * @brief 
  * 
@@ -1392,38 +1450,4 @@ Shine* Client::findStageShine(int shineID) {
         }
     }
     return nullptr;
-}
-
-void Client::showConnectError(const char16_t* msg) {
-    if (!sInstance)
-        return;
-
-    sInstance->mConnectionWait->setTxtMessageConfirm(msg);
-
-    al::hidePane(sInstance->mConnectionWait, "Page01");  // hide A button prompt
-
-    if (!sInstance->mConnectionWait->mIsAlive) {
-        sInstance->mConnectionWait->appear();
-
-        sInstance->mConnectionWait->playLoop();
-    }
-
-    al::startAction(sInstance->mConnectionWait, "Confirm", "State");
-}
-
-void Client::showConnect() {
-    if (!sInstance)
-        return;
-    
-    sInstance->mConnectionWait->appear();
-
-    sInstance->mConnectionWait->playLoop();
-    
-}
-
-void Client::hideConnect() {
-    if (!sInstance)
-        return;
-
-    sInstance->mConnectionWait->tryEnd();
 }

@@ -88,7 +88,6 @@ class Client {
 
         bool startThread();
         void readFunc();
-        static void restartConnection();
 
         static bool isSocketActive() { return sInstance ? sInstance->mSocket->isConnected() : false; };
         bool isPlayerConnected(int index) { return mPuppetInfoArr[index]->isConnected; }
@@ -175,11 +174,8 @@ class Client {
         static bool openKeyboardIP();
         static bool openKeyboardPort();
 
-        static void showConnect();
-
-        static void showConnectError(const char16_t* msg);
-
-        static void hideConnect();
+        static void showUIMessage(const char16_t* msg);
+        static void hideUIMessage();
 
         void resetCollectedShines();
 
@@ -198,6 +194,8 @@ class Client {
         void updateTagInfo(TagInf *packet);
         void updateCaptureInfo(CaptureInf* packet);
         void sendToStage(ChangeStagePacket* packet);
+        void sendUdpHolePunch();
+        void sendUdpInit();
         void disconnectPlayer(PlayerDC *packet);
 
         PuppetInfo* findPuppetInfo(const nn::account::Uid& id, bool isFindAvailable);
@@ -218,7 +216,7 @@ class Client {
 
         // --- Server Syncing Members --- 
         
-        // array of shine IDs for checking if multiple shines have been collected in quick sucession, all moons within the players stage that match the ID will be deleted
+        // array of shine IDs for checking if multiple shines have been collected in quick succession, all moons within the players stage that match the ID will be deleted
         sead::SafeArray<int, 128> curCollectedShines;
         int collectedShineCount = 0;
 
@@ -229,6 +227,8 @@ class Client {
         GameInf lastGameInfPacket = GameInf();
         GameInf emptyGameInfPacket = GameInf();
         CostumeInf lastCostumeInfPacket = CostumeInf();
+        TagInf lastTagInfPacket = TagInf();
+        CaptureInf lastCaptureInfPacket = CaptureInf();
 
         Keyboard* mKeyboard = nullptr; // keyboard for setting server IP
 
@@ -240,9 +240,7 @@ class Client {
         bool mIsFirstConnect = true;
 
         // --- Game Layouts ---
-
-        al::WindowConfirmWait* mConnectionWait;
-
+        al::WindowConfirmWait* mUIMessage;
         al::SimpleLayoutAppearWaitEnd *mConnectStatus;
 
         // --- Game Info ---
