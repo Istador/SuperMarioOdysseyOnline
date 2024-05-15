@@ -151,8 +151,7 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
 
         PlayerActorBase* playerBase = rs::getPlayerActor(curScene);
 
-        PuppetActor* curPuppet = Client::getPuppet(debugPuppetIndex);
-
+        PuppetActor* curPuppet = Client::getPuppet(debugPuppetIndex - 1);
         PuppetActor *debugPuppet = Client::getDebugPuppet();
         if (debugPuppet) {
             curPuppet = debugPuppet;
@@ -173,12 +172,29 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                     "(ZL ←)----------%s Player %d/%d %s-----------(ZL →)\n\n",
                     debugPuppetIndex + 1 < 10 ? "-" : "",
                     debugPuppetIndex + 1,
-                    Client::getMaxPlayerCount() - 1,
-                    Client::getMaxPlayerCount() - 1 < 10 ? "-" : ""
+                    Client::getMaxPlayerCount(),
+                    Client::getMaxPlayerCount() < 10 ? "-" : ""
                 );
 
-                if(curPuppet) {
+                if (debugPuppetIndex == 0) {
+                    gTextWriter->printf("Player Name: %s\n",       Client::getClientName());
+                    gTextWriter->printf("Connection Status: %s\n", isConnected ? "Online" : "Offline");
+                    gTextWriter->printf("Is in same Stage: Yes\n");
+                    gTextWriter->printf("Stage: %s\n",            client->getLastGameInfPacket()->stageName);
+                    gTextWriter->printf("Scenario: %u\n",         client->getLastGameInfPacket()->scenarioNo);
+                    gTextWriter->printf("Costume: H: %s B: %s\n", client->getLastCostumeInfPacket()->capModel, client->getLastCostumeInfPacket()->bodyModel);
+                    gTextWriter->printf("Capture: %s\n",          client->getLastCaptureInfPacket()->hackName);
 
+                    PlayerHackKeeper* hackKeeper = playerBase->getPlayerHackKeeper();
+                    if (hackKeeper) {
+                        PlayerActorHakoniwa *p1 = (PlayerActorHakoniwa*)playerBase;
+                        if (hackKeeper->currentHackActor) {
+                            gTextWriter->printf("Animation: %s\n", al::getActionName(hackKeeper->currentHackActor));
+                        } else {
+                            gTextWriter->printf("Animation: %s\n", p1->mPlayerAnimator->mAnimFrameCtrl->getActionName());
+                        }
+                    }
+                } else if (curPuppet) {
                     al::LiveActor* curModel = curPuppet->getCurrentModel();
 
                     PuppetInfo* curPupInfo = curPuppet->getInfo();
@@ -267,6 +283,8 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         if (curPuppet) {
             renderer->drawSphere4x8(curPuppet->getInfo()->playerPos, 20, sead::Color4f(1.f, 0.f, 0.f, 0.25f));
             renderer->drawSphere4x8(al::getTrans(curPuppet), 20, sead::Color4f(0.f, 0.f, 1.f, 0.25f));
+        } else if (debugPuppetIndex == 0) {
+            renderer->drawSphere4x8(client->getLastPlayerInfPacket()->playerPos, 20, sead::Color4f(1.f, 0.f, 0.f, 0.25f));
         }
 
         renderer->end();
@@ -383,11 +401,12 @@ bool hakoniwaSequenceHook(HakoniwaSequence* sequence) {
             if (al::isPadTriggerLeft(-1)) debugPuppetIndex--;
             if (al::isPadTriggerRight(-1)) debugPuppetIndex++;
 
-            if(debugPuppetIndex < 0) {
-                debugPuppetIndex = Client::getMaxPlayerCount() - 2;
+            if (debugPuppetIndex < 0) {
+                debugPuppetIndex = Client::getMaxPlayerCount() - 1;
             }
-            if (debugPuppetIndex >= Client::getMaxPlayerCount() - 1)
+            if (debugPuppetIndex >= Client::getMaxPlayerCount()) {
                 debugPuppetIndex = 0;
+            }
         }
 
     } else if (al::isPadHoldL(-1)) {

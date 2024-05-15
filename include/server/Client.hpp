@@ -184,6 +184,12 @@ class Client {
         // public for debug purposes
         SocketClient *mSocket;
 
+        PlayerInf*  getLastPlayerInfPacket()  { return &this->lastPlayerInfPacket;  }
+        GameInf*    getLastGameInfPacket()    { return &this->lastGameInfPacket;    }
+        CostumeInf* getLastCostumeInfPacket() { return &this->lastCostumeInfPacket; }
+        TagInf*     getLastTagInfPacket()     { return &this->lastTagInfPacket;     }
+        CaptureInf* getLastCaptureInfPacket() { return &this->lastCaptureInfPacket; }
+
     private:
         void updatePlayerInfo(PlayerInf *packet);
         void updateHackCapInfo(HackCapInf *packet);

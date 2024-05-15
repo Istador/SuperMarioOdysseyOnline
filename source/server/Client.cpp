@@ -1146,6 +1146,9 @@ bool Client::tryAddDebugPuppet(PuppetActor *puppet) {
  * @return PuppetActor* 
  */
 PuppetActor *Client::getPuppet(int idx) {
+    if (idx < 0) {
+        return nullptr;
+    }
     if(sInstance) {
         return sInstance->mPuppetHolder->getPuppetActor(idx);
     }else {
