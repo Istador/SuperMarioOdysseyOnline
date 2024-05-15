@@ -169,6 +169,13 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         {
         case 0:
             {
+                gTextWriter->printf(
+                    "(ZL ←)----------%s Player %d/%d %s-----------(ZL →)\n\n",
+                    debugPuppetIndex + 1 < 10 ? "-" : "",
+                    debugPuppetIndex + 1,
+                    Client::getMaxPlayerCount() - 1,
+                    Client::getMaxPlayerCount() - 1 < 10 ? "-" : ""
+                );
 
                 if(curPuppet) {
 
@@ -177,7 +184,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                     PuppetInfo* curPupInfo = curPuppet->getInfo();
 
                     if (curModel && curPupInfo) {
-                        gTextWriter->printf("Puppet Index: %d\n", debugPuppetIndex);
                         gTextWriter->printf("Player Name: %s\n", curPupInfo->puppetName);
                         gTextWriter->printf("Connection Status: %s\n", curPupInfo->isConnected ? "Online" : "Offline");
                         gTextWriter->printf("Is in Same Stage: %s\n", curPupInfo->isInSameStage ? "True" : "False");
