@@ -125,9 +125,14 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
 	gTextWriter->printf("Udp socket status: %s\n", Client::instance()->mSocket->getUdpStateChar());
     //gTextWriter->printf("nn::socket::GetLastErrno: 0x%x\n", Client::instance()->mSocket->socket_errno);
     gTextWriter->printf("Connected Players: %d/%d\n", Client::getConnectCount() + 1, Client::getMaxPlayerCount());
-    
-    gTextWriter->printf("Send Queue Count: %d/%d\n", Client::instance()->mSocket->getSendCount(), Client::instance()->mSocket->getSendMaxCount());
-    gTextWriter->printf("Recv Queue Count: %d/%d\n", Client::instance()->mSocket->getRecvCount(), Client::instance()->mSocket->getRecvMaxCount());
+
+    gTextWriter->printf(
+        "Queue Count: %d/%d (Send) %d/%d (Receive)\n",
+        socket->getSendCount(),
+        socket->getSendMaxCount(),
+        socket->getRecvCount(),
+        socket->getRecvMaxCount()
+    );
 
     al::Scene *curScene = curSequence->curScene;
 
