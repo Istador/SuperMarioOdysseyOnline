@@ -74,7 +74,7 @@ int debugPuppetIndex = 0;
 int debugCaptureIndex = 0;
 static int pageIndex = 0;
 
-static const int maxPages = 3;
+static const int maxPages = 4;
 
 void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead::DrawContext *drawContext) {
 
@@ -265,6 +265,21 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                         }
                     }
                 }
+            }
+            break;
+        case 3:
+            {
+                gTextWriter->printf("------------------- Controls --------------------\n\n");
+                gTextWriter->printf("Main/Pause Menu:\n");
+                gTextWriter->printf("- ZL + A | Mod configuration\n");
+                gTextWriter->printf("\nIn-game:\n");
+                gTextWriter->printf("- L + ← | Enable/disable Hide & Seek [H&S]\n");
+                gTextWriter->printf("- [H&S] ↑ | Switch between hider and seeker\n");
+                gTextWriter->printf("- [H&S][Hider] ← | Decrease hiding time\n");
+                gTextWriter->printf("- [H&S][Hider] → | Increase hiding time\n");
+                gTextWriter->printf("- [H&S][Hider] L + ↓ | Reset hiding time\n");
+                gTextWriter->printf("- [H&S][Gravity] L + → | Toggle gravity camera\n");
+                gTextWriter->printf("\n- ZR + ↑ | Open/close this debug menu\n");
             }
             break;
         default:
