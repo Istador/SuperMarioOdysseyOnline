@@ -217,6 +217,7 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
             break;
         case 1:
             {
+                gTextWriter->printf("----------------- Debug Puppet ------------------\n\n");
                 PuppetActor* debugPuppet = Client::getDebugPuppet();
                 PuppetInfo* debugInfo = Client::getDebugPuppetInfo();
 
