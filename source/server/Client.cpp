@@ -116,16 +116,16 @@ bool Client::startConnection() {
     bool isOverride = al::isPadHoldZL(-1);
 
     if (mServerIP.isEmpty() || isOverride) {
-        mKeyboard->setHeaderText(u"Save File does not contain an IP!");
-        mKeyboard->setSubText(u"Please set a Server IP Below.");
+        mKeyboard->setHeaderText(u"Save file does not contain a server address!");
+        mKeyboard->setSubText(u"Set a server address below.");
         mServerIP = "127.0.0.1";
         Client::openKeyboardIP();
         isNeedSave = true;
     }
 
     if (!mServerPort || isOverride) {
-        mKeyboard->setHeaderText(u"Save File does not contain a port!");
-        mKeyboard->setSubText(u"Please set a Server Port Below.");
+        mKeyboard->setHeaderText(u"Save file does not contain a server port!");
+        mKeyboard->setSubText(u"Set a server port below.");
         mServerPort = 1027;
         Client::openKeyboardPort();
         isNeedSave = true;

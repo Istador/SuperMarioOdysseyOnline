@@ -46,8 +46,8 @@ StageSceneStateServerConfig::StageSceneStateServerConfig(const char *name, al::S
     mMainMenuOptions = new sead::SafeArray<sead::WFixedSafeString<0x200>, mMainMenuOptionsCount>();
     mMainMenuOptions->mBuffer[ServerConfigOption::GAMEMODECONFIG].copy(u"Gamemode Config");
     mMainMenuOptions->mBuffer[ServerConfigOption::GAMEMODESWITCH].copy(u"Change Gamemode");
-    mMainMenuOptions->mBuffer[ServerConfigOption::SETIP].copy(u"Change Server IP");
-    mMainMenuOptions->mBuffer[ServerConfigOption::SETPORT].copy(u"Change Server Port");
+    mMainMenuOptions->mBuffer[ServerConfigOption::SETIP].copy(u"Change Server (needs restart)");
+    mMainMenuOptions->mBuffer[ServerConfigOption::SETPORT].copy(u"Change Port (needs restart)");
     mMainMenuOptions->mBuffer[ServerConfigOption::HIDESERVER].copy(u"Hide Server in Debug (OFF)"); // TBD
 
     mMainOptionsList->addStringData(getMainMenuOptions(), "TxtContent");
@@ -202,7 +202,7 @@ void StageSceneStateServerConfig::exeOpenKeyboardIP() {
 
         mCurrentList->deactivate();
 
-        Client::getKeyboard()->setHeaderText(u"Set a Server IP Below.");
+        Client::getKeyboard()->setHeaderText(u"Set a server address below.");
         Client::getKeyboard()->setSubText(u"");
 
         bool isSave = Client::openKeyboardIP(); // anything that happens after this will be ran after the keyboard closes
@@ -221,7 +221,7 @@ void StageSceneStateServerConfig::exeOpenKeyboardPort() {
 
         mCurrentList->deactivate();
 
-        Client::getKeyboard()->setHeaderText(u"Set a Server Port Below.");
+        Client::getKeyboard()->setHeaderText(u"Set a server port below.");
         Client::getKeyboard()->setSubText(u"");
 
         bool isSave = Client::openKeyboardPort(); // anything that happens after this will be ran after the keyboard closes
