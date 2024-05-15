@@ -3,9 +3,17 @@
 
 .PHONY: all clean starlight send
 
+
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
+GIT_REV    := ${GIT_BRANCH}-${GIT_COMMIT}
+ifneq (,$(strip $(shell git status --porcelain 2>/dev/null)))
+GIT_REV := $(GIT_REV)-dirty
+endif
+
 SMOVER ?= 100
-BUILDVER ?= 101 
-BUILDVERSTR ?= 1.0.1 
+BUILDVER ?= 101
+BUILDVERSTR ?= $(GIT_REV)
 IP ?= 10.0.0.221 # ftp server ip (usually is switch's local IP)
 DEBUGLOG ?= 0 # defaults to disable debug logger 
 SERVERIP ?= 0.0.0.0 # put debug logger server IP here

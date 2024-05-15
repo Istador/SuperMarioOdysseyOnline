@@ -137,6 +137,12 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         socket->getRecvMaxCount()
     );
 
+#if EMU
+    gTextWriter->printf("Mod version: %s for Emulators\n", TOSTRING(BUILDVERSTR));
+#else
+    gTextWriter->printf("Mod version: %s for Switch\n", TOSTRING(BUILDVERSTR));
+#endif
+
     al::Scene *curScene = curSequence->curScene;
 
     if (curScene && isInGame) {
