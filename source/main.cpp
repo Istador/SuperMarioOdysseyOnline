@@ -87,7 +87,7 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
 
     Time::calcTime();  // this needs to be ran every frame, so running it here works
 
-    if(!debugMode) {
+    if (!debugMode) {
         al::executeDraw(curSequence->mLytKit, "２Ｄバック（メイン画面）");
         return;
     }
@@ -110,11 +110,15 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
     gTextWriter->setScaleFromFontHeight(20.f);
 
     sead::Heap* clientHeap = Client::getClientHeap();
-    sead::Heap *gmHeap = GameModeManager::instance()->getHeap();
-
     if (clientHeap) {
-        gTextWriter->printf("Client Heap Free Size: %f/%f\n", clientHeap->getFreeSize() * 0.001f, clientHeap->getSize() * 0.001f);
-        gTextWriter->printf("Gamemode Heap Free Size: %f/%f\n", gmHeap->getFreeSize() * 0.001f, gmHeap->getSize()* 0.001f);
+        sead::Heap *gmHeap = GameModeManager::instance()->getHeap();
+        gTextWriter->printf(
+            "Heap Use: %.1f/%.0f (Client) %.1f/%.0f (Gmode)\n",
+            0.0009765625 * (clientHeap->getSize() - clientHeap->getFreeSize()),
+            0.0009765625 * clientHeap->getSize(),
+            0.0009765625 * (gmHeap->getSize() - gmHeap->getFreeSize()),
+            0.0009765625 * gmHeap->getSize()
+        );
     }
 
     gTextWriter->printf("Client Socket Connection Status: %s\n", Client::instance()->mSocket->getStateChar());
@@ -127,8 +131,7 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
 
     al::Scene *curScene = curSequence->curScene;
 
-    if(curScene && isInGame) {
-
+    if (curScene && isInGame) {
         sead::LookAtCamera *cam = al::getLookAtCamera(curScene, 0);
         sead::Projection* projection = al::getProjectionSead(curScene, 0);
 
@@ -137,7 +140,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         PuppetActor* curPuppet = Client::getPuppet(debugPuppetIndex);
 
         PuppetActor *debugPuppet = Client::getDebugPuppet();
-
         if (debugPuppet) {
             curPuppet = debugPuppet;
         }
@@ -152,7 +154,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         {
         case 0:
             {
-                // PuppetActor *curPuppet = Client::getDebugPuppet();
 
                 if(curPuppet) {
 
@@ -161,8 +162,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                     PuppetInfo* curPupInfo = curPuppet->getInfo();
 
                     if (curModel && curPupInfo) {
-                        // al::LiveActor *curCapture = curPuppet->getCapture(debugCaptureIndex);
-
                         gTextWriter->printf("Puppet Index: %d\n", debugPuppetIndex);
                         gTextWriter->printf("Player Name: %s\n", curPupInfo->puppetName);
                         gTextWriter->printf("Connection Status: %s\n", curPupInfo->isConnected ? "Online" : "Offline");
@@ -171,11 +170,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                         gTextWriter->printf("Puppet Stage: %s\n", curPupInfo->stageName);
                         gTextWriter->printf("Puppet Scenario: %u\n", curPupInfo->scenarioNo);
                         gTextWriter->printf("Puppet Costume: H: %s B: %s\n", curPupInfo->costumeHead, curPupInfo->costumeBody);
-                        //gTextWriter->printf("Packet Coords:\nX: %f\nY: %f\nZ: %f\n", curPupInfo->playerPos.x, curPupInfo->playerPos.y, curPupInfo->playerPos.z);
-                        // if (curModel) {
-                        //     sead::Vector3f* pupPos = al::getTrans(curModel);
-                        //     gTextWriter->printf("In-Game Coords:\nX: %f\nY: %f\nZ: %f\n", pupPos->x, pupPos->y, pupPos->z);
-                        // }
 
                         if(curPupInfo->isCaptured) {
                             gTextWriter->printf("Current Capture: %s\n", curPupInfo->curHack);
