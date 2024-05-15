@@ -163,7 +163,8 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         renderer->setCamera(*cam);
         renderer->setProjection(*projection);
 
-        gTextWriter->printf("----------- Page %d ------------\n", pageIndex);
+        gTextWriter->printf("(ZR ←)------------ Page %d/%d -------------(ZR →)\n", pageIndex + 1, maxPages);
+
         switch (pageIndex)
         {
         case 0:
