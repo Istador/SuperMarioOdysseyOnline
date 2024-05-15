@@ -184,24 +184,16 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
                     PuppetInfo* curPupInfo = curPuppet->getInfo();
 
                     if (curModel && curPupInfo) {
-                        gTextWriter->printf("Player Name: %s\n", curPupInfo->puppetName);
+                        gTextWriter->printf("Player Name: %s\n",       curPupInfo->puppetName);
                         gTextWriter->printf("Connection Status: %s\n", curPupInfo->isConnected ? "Online" : "Offline");
-                        gTextWriter->printf("Is in Same Stage: %s\n", curPupInfo->isInSameStage ? "True" : "False");
-                        gTextWriter->printf("Is in Capture: %s\n", curPupInfo->isCaptured ? "True" : "False");
-                        gTextWriter->printf("Puppet Stage: %s\n", curPupInfo->stageName);
-                        gTextWriter->printf("Puppet Scenario: %u\n", curPupInfo->scenarioNo);
-                        gTextWriter->printf("Puppet Costume: H: %s B: %s\n", curPupInfo->costumeHead, curPupInfo->costumeBody);
-
-                        if(curPupInfo->isCaptured) {
-                            gTextWriter->printf("Current Capture: %s\n", curPupInfo->curHack);
-                            gTextWriter->printf("Current Packet Animation: %s\n", curPupInfo->curAnimStr);
-                            gTextWriter->printf("Animation Index: %d\n", curPupInfo->curAnim);
-                        }else {
-                            gTextWriter->printf("Current Packet Animation: %s\n", curPupInfo->curAnimStr);
-                            gTextWriter->printf("Animation Index: %d\n", curPupInfo->curAnim);
-                            if (curModel) {
-                                gTextWriter->printf("Current Animation: %s\n", al::getActionName(curModel));
-                            }
+                        gTextWriter->printf("Is in same Stage: %s\n",  curPupInfo->isInSameStage ? "Yes" : "No");
+                        gTextWriter->printf("Stage: %s\n",             curPupInfo->stageName);
+                        gTextWriter->printf("Scenario: %u\n",          curPupInfo->scenarioNo);
+                        gTextWriter->printf("Costume: H: %s B: %s\n",  curPupInfo->costumeHead, curPupInfo->costumeBody);
+                        gTextWriter->printf("Capture: %s\n",           curPupInfo->isCaptured ? curPupInfo->curHack : "");
+                        gTextWriter->printf("Animation:  %d  %s\n",    curPupInfo->curAnim, curPupInfo->curAnimStr);
+                        if (!curPupInfo->isCaptured) {
+                            gTextWriter->printf("Model Animation: %s\n", al::getActionName(curModel));
                         }
                     }
                 }

@@ -35,7 +35,7 @@ Client::Client() {
     {
         mPuppetInfoArr[i] = new PuppetInfo();
 
-        sprintf(mPuppetInfoArr[i]->puppetName, "Puppet%zu", i);
+        sprintf(mPuppetInfoArr[i]->puppetName, "Empty Slot %zu", i + 1);
     }
 
     strcpy(mDebugPuppetInfo.puppetName, "PuppetDebug");
