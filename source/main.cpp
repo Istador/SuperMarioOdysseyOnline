@@ -113,9 +113,23 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
     gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, (dispHeight / 3) + 30.f));
     gTextWriter->setScaleFromFontHeight(20.f);
 
+    if (isConnected) {
+        gTextWriter->printf(
+            "Server: %s:%d | %d/%d Players\n",
+            socket->getIP(),
+            socket->getPort(),
+            Client::getConnectCount() + 1,
+            Client::getMaxPlayerCount()
+        );
+    } else {
+        gTextWriter->printf(
+            "Server: %s:%d\n",
+            socket->getIP(),
+            socket->getPort()
+        );
+    }
     gTextWriter->printf("Your TCP status: %s\n", socket->getStateChar());
     gTextWriter->printf("Your UDP status: %s\n", socket->getUdpStateChar());
-    gTextWriter->printf("Connected Players: %d/%d\n", Client::getConnectCount() + (isConnected ? 1 : 0), Client::getMaxPlayerCount());
 
     sead::Heap* clientHeap = Client::getClientHeap();
     if (clientHeap) {

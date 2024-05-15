@@ -33,7 +33,7 @@ SocketClient::SocketClient(const char* name, sead::Heap* heap, Client* client) :
 
 nn::Result SocketClient::init(const char* ip, u16 port) {
 
-    this->sock_ip = ip;
+    strcpy(this->sock_ip, ip);
     this->port    = port;
     
     in_addr  hostAddress   = { 0 };

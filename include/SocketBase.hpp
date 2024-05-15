@@ -20,7 +20,8 @@ class SocketBase {
 
         void set_sock_flags(int flags);
 
-
+        const char* getIP() { return this->sock_ip; }
+        u16 getPort() { return this->port; }
         void setName(const char *name) {strcpy(sockName, name);};
         u32 socket_errno;
 
@@ -29,7 +30,7 @@ class SocketBase {
         s32 socket_read_char(char *out);
 
         char sockName[0x10] = {};
-        const char *sock_ip;
+        char sock_ip[MAX_HOSTNAME_LENGTH] = {};
 
         u16 port;
         u8 socket_log_state = SOCKET_LOG_UNINITIALIZED;
