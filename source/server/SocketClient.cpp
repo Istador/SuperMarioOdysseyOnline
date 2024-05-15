@@ -178,14 +178,14 @@ s32 SocketClient::setPeerUdpPort(u16 port) {
 
 const char* SocketClient::getUdpStateChar() {
     if (this->mUdpAddress.port == 0) {
-        return "Waiting for handshake";
+        return "Not in use";
     }
 
     if (!this->mHasRecvUdp) {
-        return "Waiting for holepunch";
+        return "Initializing...";
     }
 
-    return "Utilizing UDP";
+    return "Using";
 }
 bool SocketClient::send(Packet *packet) {
 

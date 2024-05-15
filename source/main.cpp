@@ -92,6 +92,10 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
         return;
     }
 
+    Client* client = Client::instance();
+    SocketClient* socket = client->mSocket;
+    bool isConnected = socket->isConnected();
+
     // int dispWidth = al::getLayoutDisplayWidth();
     int dispHeight = al::getLayoutDisplayHeight();
 
@@ -109,6 +113,10 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
     gTextWriter->setCursorFromTopLeft(sead::Vector2f(10.f, (dispHeight / 3) + 30.f));
     gTextWriter->setScaleFromFontHeight(20.f);
 
+    gTextWriter->printf("Your TCP status: %s\n", socket->getStateChar());
+    gTextWriter->printf("Your UDP status: %s\n", socket->getUdpStateChar());
+    gTextWriter->printf("Connected Players: %d/%d\n", Client::getConnectCount() + (isConnected ? 1 : 0), Client::getMaxPlayerCount());
+
     sead::Heap* clientHeap = Client::getClientHeap();
     if (clientHeap) {
         sead::Heap *gmHeap = GameModeManager::instance()->getHeap();
@@ -120,11 +128,6 @@ void drawMainHook(HakoniwaSequence *curSequence, sead::Viewport *viewport, sead:
             0.0009765625 * gmHeap->getSize()
         );
     }
-
-    gTextWriter->printf("Client Socket Connection Status: %s\n", Client::instance()->mSocket->getStateChar());
-	gTextWriter->printf("Udp socket status: %s\n", Client::instance()->mSocket->getUdpStateChar());
-    //gTextWriter->printf("nn::socket::GetLastErrno: 0x%x\n", Client::instance()->mSocket->socket_errno);
-    gTextWriter->printf("Connected Players: %d/%d\n", Client::getConnectCount() + 1, Client::getMaxPlayerCount());
 
     gTextWriter->printf(
         "Queue Count: %d/%d (Send) %d/%d (Receive)\n",
