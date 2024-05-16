@@ -541,10 +541,9 @@ void SocketClient::recvFunc() {
 }
 
 bool SocketClient::queuePacket(Packet* packet) {
-    if (socket_log_state == SOCKET_LOG_CONNECTED && mPacketQueueOpen) {
-        mSendQueue.push((s64)packet,
-                        sead::MessageQueue::BlockType::NonBlocking);  // as this is non-blocking, it
-                                                                      // will always return true.
+    if (socket_log_state == SOCKET_LOG_CONNECTED && mPacketQueueOpen && !mSendQueue.isFull()) {
+        // as this is non-blocking, it will always return true.
+        mSendQueue.push((s64)packet, sead::MessageQueue::BlockType::NonBlocking);
         return true;
     } else {
         mHeap->free(packet);
