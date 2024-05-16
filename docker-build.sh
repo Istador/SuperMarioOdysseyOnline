@@ -13,4 +13,16 @@ docker  run  --rm       \
 ;
 docker  rmi  smoo-client-build
 
-cp  -r  ./romfs/  ./starlight_patch_*/atmosphere/contents/0100000000010000/.
+# copy romfs
+DIR=$(dirname ./starlight_patch_*/atmosphere/)
+cp  -r  ./romfs/  $DIR/atmosphere/contents/0100000000010000/.
+
+# create file structure for emulator builds
+if [ "$ISEMU" -eq "1" ] ; then
+  rm  -rf  $DIR/SMOO/
+  mkdir  -p  $DIR/SMOO/
+  mv  $DIR/atmosphere/contents/0100000000010000/exefs  $DIR/SMOO/exefs
+  mv  $DIR/atmosphere/contents/0100000000010000/romfs  $DIR/SMOO/romfs
+  mv  $DIR/atmosphere/exefs_patches/StarlightBase/3CA12DFAAF9C82DA064D1698DF79CDA1.ips  $DIR/SMOO/exefs/
+  rm  -rf  $DIR/atmosphere/
+fi
