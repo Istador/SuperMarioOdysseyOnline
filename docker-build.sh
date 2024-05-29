@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 ISEMU=${1:-0}
 
