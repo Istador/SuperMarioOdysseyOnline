@@ -50,10 +50,9 @@ class StageSceneStateServerConfig : public al::HostStateBase<al::Scene>, public 
         void endSubMenu();
 
     private:
-        
         inline void subMenuStart();
         inline void subMenuUpdate();
-        
+
         al::MessageSystem* mMsgSystem = nullptr;
         FooterParts* mFooterParts = nullptr;
         GameDataHolder* mGameDataHolder = nullptr;
@@ -82,6 +81,9 @@ class StageSceneStateServerConfig : public al::HostStateBase<al::Scene>, public 
         static constexpr int mMainMenuOptionsCount = 5;
         sead::SafeArray<sead::WFixedSafeString<0x200>, mMainMenuOptionsCount>* mMainMenuOptions = nullptr;
         const sead::WFixedSafeString<0x200>* getMainMenuOptions();
+
+        inline void activateInput();
+        inline void deactivateInput();
 
         bool mIsDecideConfig = false;
 };
