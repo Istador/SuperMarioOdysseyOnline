@@ -24,27 +24,24 @@ const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
     return mItems->mBuffer;
 }
 
-bool HideAndSeekConfigMenu::updateMenu(int selectIndex) {
-
-    HideAndSeekInfo *curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
-
+GameModeConfigMenu::UpdateAction HideAndSeekConfigMenu::updateMenu(int selectIndex) {
     Logger::log("Setting Gravity Mode.\n");
 
-    if (!curMode) {
-        Logger::log("Unable to Load Mode info!\n");
-        return true;   
-    }
-    
     switch (selectIndex) {
         case 0: {
+            HideAndSeekInfo *curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+            if (!curMode) {
+                Logger::log("Unable to Load Mode info!\n");
+                return UpdateAction::NOOP;
+            }
             if (GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)) {
                 curMode->mIsUseGravity = !curMode->mIsUseGravity;
+                return UpdateAction::REFRESH;
             }
-            return true;
+            return UpdateAction::NOOP;
         }
         default:
             Logger::log("Failed to interpret Index!\n");
-            return false;
+            return UpdateAction::NOOP;
     }
-    
 }

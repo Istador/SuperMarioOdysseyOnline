@@ -10,7 +10,7 @@ public:
     
     void initMenu(const al::LayoutInitInfo &initInfo) override;
     const sead::WFixedSafeString<0x200>* getStringData() override;
-    bool updateMenu(int selectIndex) override;
+    GameModeConfigMenu::UpdateAction updateMenu(int selectIndex) override;
 
     const int getMenuSize() override { return mItemCount; }
 
