@@ -35,8 +35,9 @@ bool comboBtnHook(int port) {
 
 void saveWriteHook(al::ByamlWriter* saveByml) {
 
-    const char *serverIP = Client::getCurrentIP();
-    const int serverPort = Client::getCurrentPort();
+    const char *serverIP    = Client::getCurrentIP();
+    const int  serverPort   = Client::getCurrentPort();
+    const bool serverHidden = Client::isServerHidden();
 
     if (serverIP) {
         saveByml->addString("ServerIP", serverIP);
@@ -50,13 +51,16 @@ void saveWriteHook(al::ByamlWriter* saveByml) {
         saveByml->addInt("ServerPort", 0);
     }
 
+    saveByml->addBool("ServerHidden", serverHidden);
+
     saveByml->pop();
 }
 
 bool saveReadHook(int* padRumbleInt, al::ByamlIter const& saveByml, char const* padRumbleKey) {
 
-    const char *serverIP = "";
-    int serverPort = 0;
+    const char *serverIP    = "";
+    int        serverPort   = 0;
+    bool       serverHidden = false;
 
     if (al::tryGetByamlString(&serverIP, saveByml, "ServerIP")) {
         Client::setLastUsedIP(serverIP);
@@ -65,7 +69,11 @@ bool saveReadHook(int* padRumbleInt, al::ByamlIter const& saveByml, char const* 
     if (al::tryGetByamlS32(&serverPort, saveByml, "ServerPort")) {
         Client::setLastUsedPort(serverPort);
     }
-    
+
+    if (al::tryGetByamlBool(&serverHidden, saveByml, "ServerHidden")) {
+        Client::setServerHidden(serverHidden);
+    }
+
     return al::tryGetByamlS32(padRumbleInt, saveByml, padRumbleKey);
 }
 

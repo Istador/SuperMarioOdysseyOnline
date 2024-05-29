@@ -41,17 +41,16 @@ StageSceneStateServerConfig::StageSceneStateServerConfig(const char *name, al::S
 
     mMainOptionsList->unkInt1 = 1;
 
-    mMainOptionsList->initDataNoResetSelected(4);
+    mMainOptionsList->initDataNoResetSelected(mMainMenuOptionsCount);
 
-    sead::SafeArray<sead::WFixedSafeString<0x200>, 4>* mainMenuOptions =
-        new sead::SafeArray<sead::WFixedSafeString<0x200>, 4>();
+    mMainMenuOptions = new sead::SafeArray<sead::WFixedSafeString<0x200>, mMainMenuOptionsCount>();
+    mMainMenuOptions->mBuffer[ServerConfigOption::GAMEMODECONFIG].copy(u"Gamemode Config");
+    mMainMenuOptions->mBuffer[ServerConfigOption::GAMEMODESWITCH].copy(u"Change Gamemode");
+    mMainMenuOptions->mBuffer[ServerConfigOption::SETIP].copy(u"Change Server IP");
+    mMainMenuOptions->mBuffer[ServerConfigOption::SETPORT].copy(u"Change Server Port");
+    mMainMenuOptions->mBuffer[ServerConfigOption::HIDESERVER].copy(u"Hide Server in Debug (OFF)"); // TBD
 
-    mainMenuOptions->mBuffer[ServerConfigOption::GAMEMODECONFIG].copy(u"Gamemode Config");
-    mainMenuOptions->mBuffer[ServerConfigOption::GAMEMODESWITCH].copy(u"Change Gamemode");
-    mainMenuOptions->mBuffer[ServerConfigOption::SETIP].copy(u"Change Server IP");
-    mainMenuOptions->mBuffer[ServerConfigOption::SETPORT].copy(u"Change Server Port");
-
-    mMainOptionsList->addStringData(mainMenuOptions->mBuffer, "TxtContent");
+    mMainOptionsList->addStringData(getMainMenuOptions(), "TxtContent");
 
     // WIP work on RollPartsData, not exactly working out atm
     // RollPartsData* testArr = new RollPartsData[2]();
@@ -187,6 +186,10 @@ void StageSceneStateServerConfig::exeMainMenu() {
             al::setNerve(this, &nrvStageSceneStateServerConfigOpenKeyboardPort);
             break;
         }
+        case ServerConfigOption::HIDESERVER: {
+            al::setNerve(this, &nrvStageSceneStateServerConfigHideServer);
+            break;
+        }
         default:
             kill();
             break;
@@ -229,6 +232,16 @@ void StageSceneStateServerConfig::exeOpenKeyboardPort() {
             al::setNerve(this, &nrvStageSceneStateServerConfigSaveData);
         else
             al::setNerve(this, &nrvStageSceneStateServerConfigMainMenu);
+    }
+}
+
+void StageSceneStateServerConfig::exeHideServer() {
+    if (al::isFirstStep(this)) {
+        Client::toggleServerHidden();
+        mMainOptionsList->initDataNoResetSelected(mMainMenuOptionsCount);
+        mMainOptionsList->addStringData(getMainMenuOptions(), "TxtContent");
+        mMainOptionsList->updateParts();
+        al::setNerve(this, &nrvStageSceneStateServerConfigSaveData);
     }
 }
 
@@ -339,11 +352,17 @@ void StageSceneStateServerConfig::subMenuUpdate() {
     }
 }
 
+const sead::WFixedSafeString<0x200>* StageSceneStateServerConfig::getMainMenuOptions() {
+    mMainMenuOptions->mBuffer[ServerConfigOption::HIDESERVER].copy(Client::isServerHidden() ? u"Hide Server in Debug (ON) " : u"Hide Server in Debug (OFF)");
+    return mMainMenuOptions->mBuffer;
+}
+
 
 namespace {
 NERVE_IMPL(StageSceneStateServerConfig, MainMenu)
 NERVE_IMPL(StageSceneStateServerConfig, OpenKeyboardIP)
 NERVE_IMPL(StageSceneStateServerConfig, OpenKeyboardPort)
+NERVE_IMPL(StageSceneStateServerConfig, HideServer)
 NERVE_IMPL(StageSceneStateServerConfig, GamemodeConfig)
 NERVE_IMPL(StageSceneStateServerConfig, GamemodeSelect)
 NERVE_IMPL(StageSceneStateServerConfig, SaveData)

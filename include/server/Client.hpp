@@ -131,7 +131,7 @@ class Client {
 
         static sead::Heap *getClientHeap() { return sInstance ? sInstance->mHeap : nullptr; }
 
-        static int getMaxPlayerCount() { return sInstance ? sInstance->maxPuppets + 1 : 10;}
+        static int getMaxPlayerCount() { return sInstance ? sInstance->maxPuppets + 1 : 10; }
 
         static const int getCurrentPort();
 
@@ -150,6 +150,10 @@ class Client {
         static Keyboard* getKeyboard();
 
         static const char* getCurrentIP();
+
+        static bool isServerHidden() { return sInstance ? sInstance->mServerHidden : true; }
+        static void setServerHidden(bool hide) { if (sInstance) { sInstance->mServerHidden = hide; } }
+        static void toggleServerHidden() { if (sInstance) { sInstance->mServerHidden = !sInstance->mServerHidden; } }
 
         static nn::account::Uid getClientId() { return sInstance ? sInstance->mUserID : nn::account::Uid::EmptyId;}
         
@@ -239,8 +243,8 @@ class Client {
         Keyboard* mKeyboard = nullptr; // keyboard for setting server IP
 
         hostname mServerIP;
-
         int mServerPort = 0;
+        bool mServerHidden = false;
 
         bool waitForGameInit = true;
         bool mIsFirstConnect = true;
