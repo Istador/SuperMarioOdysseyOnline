@@ -6,26 +6,22 @@
 #include "server/Client.hpp"
 
 HideAndSeekConfigMenu::HideAndSeekConfigMenu() : GameModeConfigMenu() {
-    gravityOn = new sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>();
-    gravityOn->mBuffer[0].copy(u"Toggle H&S Gravity (ON)");
-
-    gravityOff = new sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>();
-    gravityOff->mBuffer[0].copy(u"Toggle H&S Gravity (OFF)");
+    mItems = new sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>();
+    mItems->mBuffer[0].copy(u"Toggle H&S Gravity (OFF)"); // TBD
 }
 
-void HideAndSeekConfigMenu::initMenu(const al::LayoutInitInfo &initInfo) {
-    
-}
+void HideAndSeekConfigMenu::initMenu(const al::LayoutInitInfo &initInfo) {}
 
 const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
     HideAndSeekInfo *curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
-    return (
+    mItems->mBuffer[0].copy(
         GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)
         && curMode != nullptr
         && curMode->mIsUseGravity
-        ? gravityOn->mBuffer
-        : gravityOff->mBuffer
+        ? u"Toggle H&S Gravity (ON) "
+        : u"Toggle H&S Gravity (OFF)"
     );
+    return mItems->mBuffer;
 }
 
 bool HideAndSeekConfigMenu::updateMenu(int selectIndex) {

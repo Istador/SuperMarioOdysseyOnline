@@ -16,6 +16,5 @@ public:
 
 private:
     static constexpr int mItemCount = 1;
-    sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>* gravityOn = nullptr;
-    sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>* gravityOff = nullptr;
+    sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>* mItems = nullptr;
 };
