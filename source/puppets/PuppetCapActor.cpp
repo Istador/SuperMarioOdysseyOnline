@@ -1,10 +1,9 @@
 #include "actors/PuppetCapActor.h"
 #include "al/util/MathUtil.h"
 
-PuppetCapActor::PuppetCapActor(const char *name) : al::LiveActor(name) {}
+PuppetCapActor::PuppetCapActor(const char* name) : al::LiveActor(name) {}
 
-void PuppetCapActor::init(al::ActorInitInfo const &initInfo) {
-
+void PuppetCapActor::init(al::ActorInitInfo const& initInfo) {
     sead::FixedSafeString<0x20> capModelName;
 
     PlayerFunction::createCapModelName(&capModelName, tryGetPuppetCapName(mInfo));
@@ -26,7 +25,7 @@ void PuppetCapActor::initAfterPlacement() {
     al::LiveActor::initAfterPlacement();
 }
 
-void PuppetCapActor::initOnline(PuppetInfo *pupInfo) {
+void PuppetCapActor::initOnline(PuppetInfo* pupInfo) {
     mInfo = pupInfo;
 }
 
@@ -35,14 +34,13 @@ void PuppetCapActor::movement() {
 }
 
 void PuppetCapActor::control() {
-    if(mInfo->capAnim) {
+    if (mInfo->capAnim) {
         startAction(mInfo->capAnim);
     }
 
-    sead::Vector3f *cPos = al::getTransPtr(this);
+    sead::Vector3f* cPos = al::getTransPtr(this);
 
-    if(*cPos != mInfo->capPos) 
-    {
+    if (*cPos != mInfo->capPos) {
         al::lerpVec(cPos, *cPos, mInfo->capPos, 0.45);
     }
 
@@ -57,11 +55,11 @@ void PuppetCapActor::update() {
     al::LiveActor::movement();
 }
 
-void PuppetCapActor::startAction(const char *actName) {
-    if(al::tryStartActionIfNotPlaying(this, actName)) {
-        const char *curActName = al::getActionName(this);
-        if(curActName) {
-            if(al::isSklAnimExist(this, curActName)) {
+void PuppetCapActor::startAction(const char* actName) {
+    if (al::tryStartActionIfNotPlaying(this, actName)) {
+        const char* curActName = al::getActionName(this);
+        if (curActName) {
+            if (al::isSklAnimExist(this, curActName)) {
                 al::clearSklAnimInterpole(this);
             }
         }
