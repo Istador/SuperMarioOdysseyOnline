@@ -20,13 +20,13 @@ class HideAndSeekIcon : public al::LayoutActor {
 
         void showHiding();
         void showSeeking();
-        
+
         void exeAppear();
         void exeWait();
         void exeEnd();
 
     private:
-        struct HideAndSeekInfo *mInfo;
+        struct HideAndSeekInfo* mInfo;
 };
 
 namespace {

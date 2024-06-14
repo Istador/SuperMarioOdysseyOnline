@@ -9,12 +9,12 @@
 class SocketBase {
 
     public:
-        SocketBase(const char *name);
+        SocketBase(const char* name);
 
-        virtual nn::Result init(const char * ip, u16 port) = 0;
+        virtual nn::Result init(const char* ip, u16 port) = 0;
         virtual bool closeSocket();
 
-        const char *getStateChar();
+        const char* getStateChar();
         u8 getLogState();
         s32 getFd();
 
@@ -22,12 +22,12 @@ class SocketBase {
 
         const char* getIP() { return this->sock_ip; }
         u16 getPort() { return this->port; }
-        void setName(const char *name) {strcpy(sockName, name);};
+        void setName(const char* name) { strcpy(sockName, name); };
         u32 socket_errno;
 
     protected:
         s32 socket_log(const char* str);
-        s32 socket_read_char(char *out);
+        s32 socket_read_char(char* out);
 
         char sockName[0x10] = {};
         char sock_ip[MAX_HOSTNAME_LENGTH] = {};
@@ -38,6 +38,3 @@ class SocketBase {
 
         int sock_flags;
 };
-
-
-

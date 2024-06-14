@@ -13,8 +13,14 @@
 SEAD_SINGLETON_DISPOSER_IMPL(GameModeManager)
 
 GameModeManager::GameModeManager() {
-    mHeap = sead::ExpHeap::create(0x50000, "GameModeHeap", al::getSequenceHeap(), 8,
-                                    sead::Heap::HeapDirection::cHeapDirection_Reverse, false);
+    mHeap = sead::ExpHeap::create(
+        0x50000,
+        "GameModeHeap",
+        al::getSequenceHeap(),
+        8,
+        sead::Heap::HeapDirection::cHeapDirection_Reverse,
+        false
+    );
     setMode(GameMode::HIDEANDSEEK);
 }
 
@@ -47,10 +53,17 @@ void GameModeManager::setMode(GameMode mode) {
 }
 
 void GameModeManager::update() {
-    if (!mCurModeBase) return;
+    if (!mCurModeBase)
+        return;
+
     bool inScene = al::getSceneHeap() != nullptr;
-    if ((mActive && inScene && !mPaused && !mCurModeBase->isModeActive()) || mWasSceneTrans) begin();
-    if ((!mActive || mPaused || !inScene) && mCurModeBase->isModeActive()) end();
+
+    if ((mActive && inScene && !mPaused && !mCurModeBase->isModeActive()) || mWasSceneTrans)
+        begin();
+
+    if ((!mActive || mPaused || !inScene) && mCurModeBase->isModeActive())
+        end();
+
     mWasSceneTrans = false;
     if (mCurModeBase && mCurModeBase->isModeActive()) {
         sead::ScopedCurrentHeapSetter heapSetter(mHeap);

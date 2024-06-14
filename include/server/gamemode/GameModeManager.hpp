@@ -22,9 +22,7 @@ public:
     GameMode getGameMode() const { return mCurMode; }
     template<class T> T* getMode() const { return static_cast<T*>(mCurModeBase); }
     template<class T> T* getInfo() const { return static_cast<T*>(mModeInfo); }
-    void setInfo(GameModeInfoBase* info) {
-        mModeInfo = info;
-    }
+    void setInfo(GameModeInfoBase* info) { mModeInfo = info; }
 
     template<class T>
     T* createModeInfo();
@@ -38,18 +36,20 @@ public:
     bool isActive() const { return mActive; }
     bool isModeAndActive(GameMode mode) const { return isMode(mode) && isActive(); }
     bool isPaused() const { return mPaused; }
+
 private:
     sead::Heap* mHeap = nullptr;
 
-    bool mActive = false;
-    bool mPaused = false;
+    bool mActive        = false;
+    bool mPaused        = false;
     bool mWasSceneTrans = false;
-    bool mWasSetMode = false;
-    GameMode mCurMode = GameMode::NONE;
-    GameModeBase* mCurModeBase = nullptr;
-    GameModeInfoBase *mModeInfo = nullptr;
-    GameModeInitInfo *mLastInitInfo = nullptr;
-    ModeModifierBase *mCurModifier = nullptr;
+    bool mWasSetMode    = false;
+
+    GameMode          mCurMode      = GameMode::NONE;
+    GameModeBase*     mCurModeBase  = nullptr;
+    GameModeInfoBase* mModeInfo     = nullptr;
+    GameModeInitInfo* mLastInitInfo = nullptr;
+    ModeModifierBase* mCurModifier  = nullptr;
 };
 
 template<class T>
