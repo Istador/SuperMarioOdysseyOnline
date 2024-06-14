@@ -34,6 +34,7 @@ namespace al {
     class CameraPoserFix;
     class CameraPoserFix;
 }
+
 // 0xE in size
 static al::NameToCreator<al::createCameraPoser> poserEntries[] = {
     {"制限付きフォロー", &al::createCameraPoserFunction<CameraPoserFollowLimit>},

@@ -5,16 +5,16 @@
 #include "server/gamemode/GameModeBase.hpp"
 
 class HideAndSeekConfigMenu : public GameModeConfigMenu {
-public:
-    HideAndSeekConfigMenu();
-    
-    void initMenu(const al::LayoutInitInfo &initInfo) override;
-    const sead::WFixedSafeString<0x200>* getStringData() override;
-    GameModeConfigMenu::UpdateAction updateMenu(int selectIndex) override;
+    public:
+        HideAndSeekConfigMenu();
 
-    const int getMenuSize() override { return mItemCount; }
+        void initMenu(const al::LayoutInitInfo& initInfo) override;
+        const sead::WFixedSafeString<0x200>* getStringData() override;
+        GameModeConfigMenu::UpdateAction updateMenu(int selectIndex) override;
 
-private:
-    static constexpr int mItemCount = 1;
-    sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>* mItems = nullptr;
+        const int getMenuSize() override { return mItemCount; }
+
+    private:
+        static constexpr int mItemCount = 1;
+        sead::SafeArray<sead::WFixedSafeString<0x200>, mItemCount>* mItems = nullptr;
 };

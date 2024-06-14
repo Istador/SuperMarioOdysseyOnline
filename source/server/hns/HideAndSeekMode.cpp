@@ -26,23 +26,27 @@ HideAndSeekMode::HideAndSeekMode(const char* name) : GameModeBase(name) {}
 
 void HideAndSeekMode::init(const GameModeInitInfo& info) {
     mSceneObjHolder = info.mSceneObjHolder;
-    mMode = info.mMode;
-    mCurScene = (StageScene*)info.mScene;
-    mPuppetHolder = info.mPuppetHolder;
+    mMode           = info.mMode;
+    mCurScene       = (StageScene*)info.mScene;
+    mPuppetHolder   = info.mPuppetHolder;
 
     GameModeInfoBase* curGameInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
 
-    if (curGameInfo) Logger::log("Gamemode info found: %s %s\n", GameModeFactory::getModeString(curGameInfo->mMode), GameModeFactory::getModeString(info.mMode));
-    else Logger::log("No gamemode info found\n");
+    if (curGameInfo)
+        Logger::log("Gamemode info found: %s %s\n", GameModeFactory::getModeString(curGameInfo->mMode), GameModeFactory::getModeString(info.mMode));
+    else
+        Logger::log("No gamemode info found\n");
+
     if (curGameInfo && curGameInfo->mMode == mMode) {
         mInfo = (HideAndSeekInfo*)curGameInfo;
         mModeTimer = new GameModeTimer(mInfo->mHidingTime);
         Logger::log("Reinitialized timer with time %d:%.2d\n", mInfo->mHidingTime.mMinutes, mInfo->mHidingTime.mSeconds);
     } else {
-        if (curGameInfo) delete curGameInfo;  // attempt to destory previous info before creating new one
-        
+        if (curGameInfo)
+            delete curGameInfo; // attempt to destory previous info before creating new one
+
         mInfo = GameModeManager::instance()->createModeInfo<HideAndSeekInfo>();
-        
+
         mModeTimer = new GameModeTimer();
     }
 
@@ -51,7 +55,6 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
     mModeLayout->showSeeking();
 
     mModeTimer->disableTimer();
-
 }
 
 void HideAndSeekMode::begin() {
@@ -67,21 +70,17 @@ void HideAndSeekMode::begin() {
         mModeLayout->showSeeking();
     }
 
-    CoinCounter *coinCollect = mCurScene->mSceneLayout->mCoinCollectLyt;
-    CoinCounter* coinCounter = mCurScene->mSceneLayout->mCoinCountLyt;
-    MapMini* compass = mCurScene->mSceneLayout->mMapMiniLyt;
+    CoinCounter*                   coinCollect  = mCurScene->mSceneLayout->mCoinCollectLyt;
+    CoinCounter*                   coinCounter  = mCurScene->mSceneLayout->mCoinCountLyt;
+    MapMini*                       compass      = mCurScene->mSceneLayout->mMapMiniLyt;
     al::SimpleLayoutAppearWaitEnd* playGuideLyt = mCurScene->mSceneLayout->mPlayGuideMenuLyt;
 
     mInvulnTime = 0;
 
-    if(coinCounter->mIsAlive)
-        coinCounter->tryEnd();
-    if(coinCollect->mIsAlive)
-        coinCollect->tryEnd();
-    if (compass->mIsAlive)
-        compass->end();
-    if (playGuideLyt->mIsAlive)
-        playGuideLyt->end();
+    if (coinCounter->mIsAlive)  coinCounter->tryEnd();
+    if (coinCollect->mIsAlive)  coinCollect->tryEnd();
+    if (compass->mIsAlive)      compass->end();
+    if (playGuideLyt->mIsAlive) playGuideLyt->end();
 
     GameModeBase::begin();
 
@@ -94,21 +93,17 @@ void HideAndSeekMode::end() {
 
     mModeTimer->disableTimer();
 
-    CoinCounter *coinCollect = mCurScene->mSceneLayout->mCoinCollectLyt;
-    CoinCounter* coinCounter = mCurScene->mSceneLayout->mCoinCountLyt;
-    MapMini* compass = mCurScene->mSceneLayout->mMapMiniLyt;
+    CoinCounter*                   coinCollect  = mCurScene->mSceneLayout->mCoinCollectLyt;
+    CoinCounter*                   coinCounter  = mCurScene->mSceneLayout->mCoinCountLyt;
+    MapMini*                       compass      = mCurScene->mSceneLayout->mMapMiniLyt;
     al::SimpleLayoutAppearWaitEnd* playGuideLyt = mCurScene->mSceneLayout->mPlayGuideMenuLyt;
 
     mInvulnTime = 0.0f;
 
-    if(!coinCounter->mIsAlive)
-        coinCounter->tryStart();
-    if(!coinCollect->mIsAlive)
-        coinCollect->tryStart();
-    if (!compass->mIsAlive)
-        compass->appearSlideIn();
-    if (!playGuideLyt->mIsAlive)
-        playGuideLyt->appear();
+    if (!coinCounter->mIsAlive)  coinCounter->tryStart();
+    if (!coinCollect->mIsAlive)  coinCollect->tryStart();
+    if (!compass->mIsAlive)      compass->appearSlideIn();
+    if (!playGuideLyt->mIsAlive) playGuideLyt->appear();
 
     GameModeBase::end();
 
@@ -116,41 +111,34 @@ void HideAndSeekMode::end() {
 }
 
 void HideAndSeekMode::update() {
-
     PlayerActorBase* playerBase = rs::getPlayerActor(mCurScene);
 
     bool isYukimaru = !playerBase->getPlayerInfo(); // if PlayerInfo is a nullptr, that means we're dealing with the bound bowl racer
 
     if (mIsFirstFrame) {
-
         if (mInfo->mIsUseGravityCam && mTicket) {
             al::startCamera(mCurScene, mTicket, -1);
         }
-
         mIsFirstFrame = false;
     }
 
     if (!mInfo->mIsPlayerIt) {
-        if (mInvulnTime >= 5) {  
-
+        if (mInvulnTime >= 5) {
             if (playerBase) {
-                for (size_t i = 0; i < mPuppetHolder->getSize(); i++)
-                {
-                    PuppetInfo *curInfo = Client::getPuppetInfo(i);
+                for (size_t i = 0; i < mPuppetHolder->getSize(); i++) {
+                    PuppetInfo* curInfo = Client::getPuppetInfo(i);
 
                     if (!curInfo) {
                         Logger::log("Checking %d, hit bounds %d-%d\n", i, mPuppetHolder->getSize(), Client::getMaxPlayerCount());
                         break;
                     }
 
-                    if(curInfo->isConnected && curInfo->isInSameStage && curInfo->isIt) { 
-
+                    if (curInfo->isConnected && curInfo->isInSameStage && curInfo->isIt) {
                         float pupDist = al::calcDistance(playerBase, curInfo->playerPos); // TODO: remove distance calculations and use hit sensors to determine this
 
                         if (!isYukimaru) {
-                            if(pupDist < 200.f && ((PlayerActorHakoniwa*)playerBase)->mDimKeeper->is2DModel == curInfo->is2D) {
-                                if(!PlayerFunction::isPlayerDeadStatus(playerBase)) {
-                                    
+                            if (pupDist < 200.f && ((PlayerActorHakoniwa*)playerBase)->mDimKeeper->is2DModel == curInfo->is2D) {
+                                if (!PlayerFunction::isPlayerDeadStatus(playerBase)) {
                                     GameDataFunction::killPlayer(GameDataHolderAccessor(this));
                                     playerBase->startDemoPuppetable();
                                     al::setVelocityZero(playerBase);
@@ -161,24 +149,21 @@ void HideAndSeekMode::update() {
                                     mInfo->mIsPlayerIt = true;
                                     mModeTimer->disableTimer();
                                     mModeLayout->showSeeking();
-                                    
+
                                     Client::sendTagInfPacket();
                                 }
                             } else if (PlayerFunction::isPlayerDeadStatus(playerBase)) {
-
                                 mInfo->mIsPlayerIt = true;
                                 mModeTimer->disableTimer();
                                 mModeLayout->showSeeking();
 
                                 Client::sendTagInfPacket();
-                                
                             }
                         }
                     }
                 }
             }
-            
-        }else {
+        } else {
             mInvulnTime += Time::deltaTime;
         }
 
@@ -193,7 +178,7 @@ void HideAndSeekMode::update() {
             al::setGravity(playerBase, gravity);
             al::setGravity(((PlayerActorHakoniwa*)playerBase)->mHackCap, gravity);
         }
-        
+
         if (al::isPadHoldL(-1)) {
             if (al::isPadTriggerRight(-1)) {
                 if (al::isActiveCamera(mTicket)) {
@@ -211,8 +196,7 @@ void HideAndSeekMode::update() {
         }
     }
 
-    if (al::isPadTriggerUp(-1) && !al::isPadHoldZL(-1))
-    {
+    if (al::isPadTriggerUp(-1) && !al::isPadHoldZL(-1)) {
         mInfo->mIsPlayerIt = !mInfo->mIsPlayerIt;
 
         mModeTimer->toggleTimer();
