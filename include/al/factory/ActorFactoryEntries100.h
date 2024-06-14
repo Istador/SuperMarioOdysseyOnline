@@ -5,8 +5,7 @@
 #include "actors/PuppetActor.h"
 #include "actors/PuppetHackActor.h"
 
-namespace al
-{
+namespace al {
     class AllDeadWatcher;
     class BgmPlayObj;
     class CameraRailHolder;

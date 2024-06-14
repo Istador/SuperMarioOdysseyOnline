@@ -12,19 +12,19 @@ GameModeConfigMenu* createGameModeConfigMenu(const char* name) {
 };
 
 __attribute((used)) constexpr al::NameToCreator<createMenu> menuTable[] = {
-    {"HideAndSeek", &createGameModeConfigMenu<HideAndSeekConfigMenu>},
+    { "HideAndSeek", &createGameModeConfigMenu<HideAndSeekConfigMenu> },
 };
 
 class GameModeConfigMenuFactory : public al::Factory<createMenu> {
-public:
-    GameModeConfigMenuFactory(const char* fName) {
-        this->factoryName = fName;
-        this->actorTable = menuTable;
-        this->factoryCount = sizeof(menuTable) / sizeof(menuTable[0]);
-    };
+    public:
+        GameModeConfigMenuFactory(const char* fName) {
+            this->factoryName = fName;
+            this->actorTable = menuTable;
+            this->factoryCount = sizeof(menuTable) / sizeof(menuTable[0]);
+        };
 
-    constexpr static const char* getMenuName(int idx);
-    constexpr static int getMenuCount();
+        constexpr static const char* getMenuName(int idx);
+        constexpr static int getMenuCount();
 };
 
 constexpr const char* GameModeConfigMenuFactory::getMenuName(int idx) {

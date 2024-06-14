@@ -21,25 +21,24 @@ enum GameMode : s8 {
 
 // struct containing info about the games state for use in gamemodes
 struct GameModeInitInfo {
-    GameModeInitInfo(al::ActorInitInfo* info, al::Scene *scene){
+    GameModeInitInfo(al::ActorInitInfo* info, al::Scene* scene) {
         mLayoutInitInfo = info->mLayoutInitInfo;
-        mPlayerHolder = info->mActorSceneInfo.mPlayerHolder;
+        mPlayerHolder   = info->mActorSceneInfo.mPlayerHolder;
         mSceneObjHolder = info->mActorSceneInfo.mSceneObjHolder;
-        mScene = scene;
-        
+        mScene          = scene;
     };
 
-    void initServerInfo(GameMode mode, PuppetHolder *pupHolder) {
-        mMode = mode;
+    void initServerInfo(GameMode mode, PuppetHolder* pupHolder) {
+        mMode         = mode;
         mPuppetHolder = pupHolder;
     }
-    
+
     al::LayoutInitInfo* mLayoutInitInfo;
-    al::PlayerHolder* mPlayerHolder;
-    al::SceneObjHolder *mSceneObjHolder;
-    al::Scene* mScene;
-    GameMode mMode = GameMode::NONE;
-    PuppetHolder *mPuppetHolder;
+    al::PlayerHolder*   mPlayerHolder;
+    al::SceneObjHolder* mSceneObjHolder;
+    al::Scene*          mScene;
+    GameMode            mMode = GameMode::NONE;
+    PuppetHolder*       mPuppetHolder;
 };
 
 // base class for all gamemodes, must inherit from this to have a functional gamemode
@@ -54,18 +53,18 @@ public:
 
     virtual bool isModeActive() const { return mIsActive; }
 
-    virtual void init(GameModeInitInfo const &info);
+    virtual void init(GameModeInitInfo const& info);
 
     virtual void begin() { mIsActive = true; }
     virtual void update();
     virtual void end() { mIsActive = false; }
-    
+
 protected:
     sead::FixedSafeString<0x10> mName;
-    al::SceneObjHolder *mSceneObjHolder = nullptr;
-    GameMode mMode = GameMode::NONE;
-    StageScene* mCurScene = nullptr;
-    PuppetHolder *mPuppetHolder = nullptr;
-    bool mIsActive = false;
-    bool mIsFirstFrame = true;
+    al::SceneObjHolder*         mSceneObjHolder = nullptr;
+    GameMode                    mMode           = GameMode::NONE;
+    StageScene*                 mCurScene       = nullptr;
+    PuppetHolder*               mPuppetHolder   = nullptr;
+    bool                        mIsActive       = false;
+    bool                        mIsFirstFrame   = true;
 };
