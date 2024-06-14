@@ -174,23 +174,20 @@ void PuppetActor::control() {
                 mPuppetCap->makeActorAlive();
                 al::setTrans(mPuppetCap, mInfo->capPos);
             }
-        } else {
-            if (al::isAlive(mPuppetCap)) {
-                mPuppetCap->makeActorDead();
+        } else if (al::isAlive(mPuppetCap)) {
+            mPuppetCap->makeActorDead();
 
-                startAction(mInfo->curSubAnimStr);
+            startAction(mInfo->curSubAnimStr);
 
-                al::LiveActor* headModel = al::getSubActor(curModel, "頭");
-                if (headModel) { al::startVisAnimForAction(headModel, "CapOn"); }
-            }
+            al::LiveActor* headModel = al::getSubActor(curModel, "頭");
+            if (headModel) { al::startVisAnimForAction(headModel, "CapOn"); }
         }
 
         if (mNameTag) {
             if (GameModeManager::instance()->isModeAndActive(GameMode::HIDEANDSEEK)) {
                 mNameTag->mIsAlive = GameModeManager::instance()->getMode<HideAndSeekMode>()->isPlayerIt() && mInfo->isIt;
-            } else {
-                if (!mNameTag->mIsAlive)
-                    mNameTag->appear();
+            } else if (!mNameTag->mIsAlive) {
+                mNameTag->appear();
             }
         }
 
@@ -212,10 +209,8 @@ void PuppetActor::makeActorAlive() {
     }
 
     // update name tag when puppet becomes active again
-    if (mInfo) {
-        if (mNameTag) {
-            mNameTag->setText(mInfo->puppetName);
-        }
+    if (mInfo && mNameTag) {
+        mNameTag->setText(mInfo->puppetName);
     }
 
     al::LiveActor::makeActorAlive();
@@ -253,7 +248,7 @@ bool PuppetActor::receiveMsg(const al::SensorMsg* msg, al::HitSensor* source, al
 void PuppetActor::startAction(const char* actName) {
     al::LiveActor* curModel = getCurrentModel();
 
-    if (!actName) return;
+    if (!actName) { return; }
 
     if (al::tryStartActionIfNotPlaying(curModel, actName)) {
         const char* curActName = al::getActionName(curModel);
@@ -309,9 +304,8 @@ bool PuppetActor::isNeedBlending() {
     const char* curActName = al::getActionName(getCurrentModel());
     if (curActName) {
         return al::isEqualSubString(curActName, "Move") || al::isEqualSubString(curActName, "Sand") || al::isEqualSubString(curActName, "MotorcycleRide");
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool PuppetActor::isInCaptureList(const char* hackName) {
@@ -490,17 +484,11 @@ PlayerCostumeInfo* initMarioModelPuppet(
 
     // Logger::log("Getting Cap Model/Head Model Name.\n");
 
-    const char *capModelName;
-
-    if (bodyInfo->mIsUseHeadSuffix) {
-        if (al::isEqualString(bodyInfo->costumeName, capName)) {
-            capModelName = "";
-        } else {
-            capModelName = capName;
-        }
-    } else {
-        capModelName = "";
-    }
+    const char* capModelName = (
+        bodyInfo->mIsUseHeadSuffix && !al::isEqualString(bodyInfo->costumeName, capName)
+        ?  capName
+        :  ""
+    );
 
     const char* headType;
     if (!al::isEqualSubString(capName, "Mario64")) {
@@ -579,7 +567,7 @@ PlayerHeadCostumeInfo* initMarioHeadCostumeInfo(
 
     al::StringTmp<0x80> headArcName("%sHead%s", capModelName, headType);
     al::StringTmp<0x100> arcSuffix("Head");
-    if (headSuffix) arcSuffix.format("Head%s", headSuffix);
+    if (headSuffix) { arcSuffix.format("Head%s", headSuffix); }
 
     headModel->initPartsFixFile(player, initInfo, headArcName.cstr(), 0, arcSuffix.cstr());
     al::setMaterialProgrammable(headModel);

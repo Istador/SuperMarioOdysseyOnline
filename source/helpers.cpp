@@ -17,7 +17,6 @@ bool isPartOf(const char* w1, const char* w2) {
 
     while (w1[i] != '\0') {
         if (w1[i] == w2[j]) {
-            int init = i;
             while (w1[i] == w2[j] && w2[j] != '\0') {
                 j++;
                 i++;

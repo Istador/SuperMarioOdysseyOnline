@@ -2,7 +2,6 @@
 #include <math.h>
 #include "al/util/ControllerUtil.h"
 #include "server/DeltaTime.hpp"
-#include "logger.hpp"
 
 GameModeTimer::GameModeTimer(bool isCountUp, float milli, int seconds, int minutes, int hours) {
     mIsCountUp = isCountUp;
@@ -25,14 +24,18 @@ GameModeTimer::GameModeTimer() {
 }
 
 void GameModeTimer::setTime(float milli, int seconds, int minutes, int hours) {
-    if (milli >= 0)
+    if (milli >= 0) {
         mTime.mMilliseconds = milli;
-    if (seconds >= 0)
+    }
+    if (seconds >= 0) {
         mTime.mSeconds = seconds;
-    if (minutes >= 0)
+    }
+    if (minutes >= 0) {
         mTime.mMinutes = minutes;
-    if (hours >= 0)
+    }
+    if (hours >= 0) {
         mTime.mHours = hours;
+    }
 }
 
 void GameModeTimer::setTime(GameTime const& time) {

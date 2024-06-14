@@ -13,12 +13,11 @@ HideAndSeekConfigMenu::HideAndSeekConfigMenu() : GameModeConfigMenu() {
 void HideAndSeekConfigMenu::initMenu(const al::LayoutInitInfo &initInfo) {}
 
 const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
-    HideAndSeekInfo* curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+    HideAndSeekInfo* hns = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+    bool isMode = hns != nullptr && GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK);
 
     mItems->mBuffer[0].copy(
-        GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)
-        && curMode != nullptr
-        && curMode->mIsUseGravity
+        isMode && hns->mIsUseGravity
         ? u"Toggle H&S Gravity (ON) "
         : u"Toggle H&S Gravity (OFF)"
     );
@@ -27,23 +26,23 @@ const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
 }
 
 GameModeConfigMenu::UpdateAction HideAndSeekConfigMenu::updateMenu(int selectIndex) {
-    Logger::log("Setting Gravity Mode.\n");
-
     switch (selectIndex) {
         case 0: {
-            HideAndSeekInfo* curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
-            if (!curMode) {
+            HideAndSeekInfo* hns = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+            if (!hns) {
                 Logger::log("Unable to Load Mode info!\n");
                 return UpdateAction::NOOP;
             }
             if (GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)) {
-                curMode->mIsUseGravity = !curMode->mIsUseGravity;
+                Logger::log("Setting Gravity Mode.\n");
+                hns->mIsUseGravity = !hns->mIsUseGravity;
                 return UpdateAction::REFRESH;
             }
             return UpdateAction::NOOP;
         }
-        default:
+        default: {
             Logger::log("Failed to interpret Index!\n");
             return UpdateAction::NOOP;
+        }
     }
 }

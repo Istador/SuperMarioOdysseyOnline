@@ -12,9 +12,9 @@
 
 struct PuppetInfo {
     // General Puppet Info
+    nn::account::Uid playerID;
     char             puppetName[0x10] = {}; // max user account name size is 10 chars, so this could go down to 0xB
     bool             isConnected      = false;
-    nn::account::Uid playerID;
 
     // Puppet Translation Info
     sead::Vector3f playerPos = sead::Vector3f(0.f,0.f,0.f);

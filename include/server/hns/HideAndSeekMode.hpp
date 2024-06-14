@@ -28,7 +28,7 @@ class HideAndSeekMode : public GameModeBase {
         virtual void update() override;
         virtual void end() override;
 
-        bool isPlayerIt() const { return mInfo->mIsPlayerIt; };
+        bool isPlayerIt() const { return mInfo->mIsPlayerIt; }
 
         void setPlayerTagState(bool state) { mInfo->mIsPlayerIt = state; }
 
@@ -44,4 +44,6 @@ class HideAndSeekMode : public GameModeBase {
         HideAndSeekIcon*  mModeLayout = nullptr;
         HideAndSeekInfo*  mInfo       = nullptr;
         al::CameraTicket* mTicket     = nullptr;
+
+        void updateTagState(bool isSeeking);
 };

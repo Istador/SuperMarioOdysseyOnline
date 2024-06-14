@@ -80,15 +80,13 @@ void NameTag::updateTrans() {
 }
 
 void NameTag::update() {
-    if (al::isNerve(this, &nrvNameTagEnd) || al::isNerve(this, &nrvNameTagHide) || !mIsAlive) {
-        if (isNearPlayerActor(mStartDist)) {
-            appear();
-        }
-    }
-
-    if (!al::isNerve(this, &nrvNameTagEnd) && !al::isNerve(this, &nrvNameTagHide) && mIsAlive) {
+    if (mIsAlive && !al::isNerve(this, &nrvNameTagEnd) && !al::isNerve(this, &nrvNameTagHide)) {
         if (!isNearPlayerActor(mEndDist)) {
             al::setNerve(this, &nrvNameTagEnd);
+        }
+    } else {
+        if (isNearPlayerActor(mStartDist)) {
+            appear();
         }
     }
 }
@@ -128,21 +126,25 @@ const char* NameTag::getCurrentState() {
 }
 
 void NameTag::exeAppear(void) {
-    if (al::isActionEnd(this, 0))
+    if (al::isActionEnd(this, 0)) {
         al::setNerve(this, &nrvNameTagWait);
+    }
 }
 
 void NameTag::exeWait(void) {
-    if (al::isFirstStep(this))
+    if (al::isFirstStep(this)) {
         al::startAction(this, "Wait", 0);
+    }
 }
 
 void NameTag::exeEnd(void) {
-    if (al::isFirstStep(this))
+    if (al::isFirstStep(this)) {
         al::startAction(this, "End", 0);
+    }
 
-    if (al::isActionEnd(this, 0))
+    if (al::isActionEnd(this, 0)) {
         al::setNerve(this, &nrvNameTagHide);
+    }
 }
 
 void NameTag::exeHide(void) {}
