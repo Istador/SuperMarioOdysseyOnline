@@ -78,8 +78,9 @@ namespace al
         virtual al::StageSwitchKeeper* getStageSwitchKeeper() const { return this->mStageSwitchKeeper; };
 
         virtual al::RailRider* getRailRider() const {
-            if (this->mRailKeeper)
+            if (this->mRailKeeper) {
                 return this->mRailKeeper->getRailRider();
+            }
             return nullptr;
         };
 
