@@ -16,7 +16,7 @@
 // enum for defining game mode types
 enum GameMode : s8 {
     NONE = -1,
-    HIDEANDSEEK
+    HIDEANDSEEK,
 };
 
 // struct containing info about the games state for use in gamemodes

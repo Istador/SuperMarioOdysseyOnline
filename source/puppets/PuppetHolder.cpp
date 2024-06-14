@@ -20,13 +20,15 @@ PuppetHolder::PuppetHolder(int size) {
  * @return returns true if resizing was successful
  */
 bool PuppetHolder::resizeHolder(int size) {
-    if (mPuppetArr.capacity() == size)
+    if (mPuppetArr.capacity() == size) {
         return true;  // no need to resize if we're already at the same capacity
+    }
 
     sead::Heap* seqHeap = sead::HeapMgr::instance()->findHeapByName("SequenceHeap", 0);
 
-    if (!mPuppetArr.isBufferReady())
+    if (!mPuppetArr.isBufferReady()) {
         return mPuppetArr.tryAllocBuffer(size, seqHeap);
+    }
 
     sead::PtrArray<PuppetActor> newPuppets = sead::PtrArray<PuppetActor>();
 
@@ -42,18 +44,17 @@ bool PuppetHolder::resizeHolder(int size) {
         mPuppetArr = newPuppets;
 
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool PuppetHolder::tryRegisterPuppet(PuppetActor* puppet) {
     if (!mPuppetArr.isFull()) {
         mPuppetArr.pushBack(puppet);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool PuppetHolder::tryRegisterDebugPuppet(PuppetActor* puppet) {
@@ -88,14 +89,11 @@ void PuppetHolder::update() {
 }
 
 bool PuppetHolder::checkInfoIsInStage(PuppetInfo* info) {
-    if (info->isConnected) {
-        if (info->scenarioNo < 15) {
-            return al::isEqualString(mStageName.cstr(), info->stageName);
-        } else {
-            return al::isEqualString(mStageName.cstr(), info->stageName) && info->scenarioNo == mScenarioNo;
-        }
-    }
-    return false;
+    return (
+        info->isConnected
+        && (info->scenarioNo < 15 || info->scenarioNo == mScenarioNo)
+        && al::isEqualString(mStageName.cstr(), info->stageName)
+    );
 }
 
 void PuppetHolder::setStageInfo(const char* stageName, u8 scenarioNo) {
