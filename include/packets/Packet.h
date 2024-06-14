@@ -28,7 +28,7 @@ enum PacketType : short {
     CMD,
     UDPINIT,
     HOLEPUNCH,
-    End // end of enum for bounds checking
+    End, // end of enum for bounds checking
 };
 
 // attribute otherwise the build log is spammed with unused warnings
@@ -52,12 +52,12 @@ USED static const char* packetNames[] = {
 
 enum SenderType {
     SERVER,
-    CLIENT
+    CLIENT,
 };
 
 enum ConnectionTypes {
     INIT,
-    RECONNECT
+    RECONNECT,
 };
 
 struct PACKED Packet {

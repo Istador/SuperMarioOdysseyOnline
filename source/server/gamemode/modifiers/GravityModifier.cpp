@@ -7,14 +7,16 @@ GravityModifier::GravityModifier(GameModeBase* mode) : ModeModifierBase(mode) {}
 
 void GravityModifier::enable() {
     ModeModifierBase::enable();
-    if (mTicket && mScene)
+    if (mTicket && mScene) {
         al::startCamera(mScene, mTicket, -1);
+    }
 }
 
 void GravityModifier::disable() {
     ModeModifierBase::disable();
-    if (mTicket && mScene)
+    if (mTicket && mScene) {
         al::endCamera(mScene, mTicket, -1, false);
+    }
 }
 
 void GravityModifier::update() {

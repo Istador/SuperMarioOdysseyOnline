@@ -12,11 +12,11 @@ GameModeBase* createGameMode(const char* name) {
 };
 
 __attribute((used)) constexpr al::NameToCreator<createMode> modeTable[] = {
-    { "HideAndSeek", &createGameMode<HideAndSeekMode> }
+    { "HideAndSeek", &createGameMode<HideAndSeekMode> },
 };
 
 constexpr const char* modeNames[] = {
-    "Hide and Seek"
+    "Hide and Seek",
 };
 
 class GameModeFactory : public al::Factory<createMode> {
@@ -35,20 +35,23 @@ class GameModeFactory : public al::Factory<createMode> {
 
 // TODO: possibly use shadows' crc32 hash algorithm for this
 constexpr const char* GameModeFactory::getModeString(GameMode mode) {
-    if (mode >= 0 && (size_t)mode < sizeof(modeTable) / sizeof(modeTable[0]))
+    if (mode >= 0 && (size_t)mode < sizeof(modeTable) / sizeof(modeTable[0])) {
         return modeTable[mode].creatorName;
+    }
     return nullptr;
 }
 
 constexpr const char* GameModeFactory::getModeName(GameMode mode) {
-    if (mode >= 0 && (size_t)mode < sizeof(modeNames) / sizeof(modeNames[0]))
+    if (mode >= 0 && (size_t)mode < sizeof(modeNames) / sizeof(modeNames[0])) {
         return modeNames[mode];
+    }
     return nullptr;
 }
 
 constexpr const char* GameModeFactory::getModeName(int idx) {
-    if (idx >= 0 && (size_t)idx < sizeof(modeNames) / sizeof(modeNames[0]))
+    if (idx >= 0 && (size_t)idx < sizeof(modeNames) / sizeof(modeNames[0])) {
         return modeNames[idx];
+    }
     return nullptr;
 }
 

@@ -32,18 +32,20 @@ void HideAndSeekMode::init(const GameModeInitInfo& info) {
 
     GameModeInfoBase* curGameInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
 
-    if (curGameInfo)
+    if (curGameInfo) {
         Logger::log("Gamemode info found: %s %s\n", GameModeFactory::getModeString(curGameInfo->mMode), GameModeFactory::getModeString(info.mMode));
-    else
+    } else {
         Logger::log("No gamemode info found\n");
+    }
 
     if (curGameInfo && curGameInfo->mMode == mMode) {
         mInfo = (HideAndSeekInfo*)curGameInfo;
         mModeTimer = new GameModeTimer(mInfo->mHidingTime);
         Logger::log("Reinitialized timer with time %d:%.2d\n", mInfo->mHidingTime.mMinutes, mInfo->mHidingTime.mSeconds);
     } else {
-        if (curGameInfo)
+        if (curGameInfo) {
             delete curGameInfo; // attempt to destory previous info before creating new one
+        }
 
         mInfo = GameModeManager::instance()->createModeInfo<HideAndSeekInfo>();
 
@@ -62,12 +64,12 @@ void HideAndSeekMode::begin() {
 
     mIsFirstFrame = true;
 
-    if (!mInfo->mIsPlayerIt) {
-        mModeTimer->enableTimer();
-        mModeLayout->showHiding();
-    } else {
+    if (mInfo->mIsPlayerIt) {
         mModeTimer->disableTimer();
         mModeLayout->showSeeking();
+    } else {
+        mModeTimer->enableTimer();
+        mModeLayout->showHiding();
     }
 
     CoinCounter*                   coinCollect  = mCurScene->mSceneLayout->mCoinCollectLyt;
@@ -77,10 +79,10 @@ void HideAndSeekMode::begin() {
 
     mInvulnTime = 0;
 
-    if (coinCounter->mIsAlive)  coinCounter->tryEnd();
-    if (coinCollect->mIsAlive)  coinCollect->tryEnd();
-    if (compass->mIsAlive)      compass->end();
-    if (playGuideLyt->mIsAlive) playGuideLyt->end();
+    if (coinCounter->mIsAlive)  { coinCounter->tryEnd(); }
+    if (coinCollect->mIsAlive)  { coinCollect->tryEnd(); }
+    if (compass->mIsAlive)      { compass->end();        }
+    if (playGuideLyt->mIsAlive) { playGuideLyt->end();   }
 
     GameModeBase::begin();
 
@@ -100,10 +102,10 @@ void HideAndSeekMode::end() {
 
     mInvulnTime = 0.0f;
 
-    if (!coinCounter->mIsAlive)  coinCounter->tryStart();
-    if (!coinCollect->mIsAlive)  coinCollect->tryStart();
-    if (!compass->mIsAlive)      compass->appearSlideIn();
-    if (!playGuideLyt->mIsAlive) playGuideLyt->appear();
+    if (!coinCounter->mIsAlive)  { coinCounter->tryStart();  }
+    if (!coinCollect->mIsAlive)  { coinCollect->tryStart();  }
+    if (!compass->mIsAlive)      { compass->appearSlideIn(); }
+    if (!playGuideLyt->mIsAlive) { playGuideLyt->appear();   }
 
     GameModeBase::end();
 
@@ -123,53 +125,43 @@ void HideAndSeekMode::update() {
     }
 
     if (!mInfo->mIsPlayerIt) {
-        if (mInvulnTime >= 5) {
-            if (playerBase) {
-                for (size_t i = 0; i < mPuppetHolder->getSize(); i++) {
-                    PuppetInfo* curInfo = Client::getPuppetInfo(i);
+        if (mInvulnTime < 5) {
+            mInvulnTime += Time::deltaTime;
+        } else if (playerBase) {
+            for (size_t i = 0; i < (size_t)mPuppetHolder->getSize(); i++) {
+                PuppetInfo* other = Client::getPuppetInfo(i);
+                if (!other) {
+                    Logger::log("Checking %d, hit bounds %d-%d\n", i, mPuppetHolder->getSize(), Client::getMaxPlayerCount());
+                    break;
+                }
 
-                    if (!curInfo) {
-                        Logger::log("Checking %d, hit bounds %d-%d\n", i, mPuppetHolder->getSize(), Client::getMaxPlayerCount());
-                        break;
+                if (!other->isConnected || !other->isInSameStage || !other->isIt || isYukimaru) {
+                    continue;
+                }
+
+                float pupDist = al::calcDistance(playerBase, other->playerPos); // TODO: remove distance calculations and use hit sensors to determine this
+
+                if (pupDist < 200.f && ((PlayerActorHakoniwa*)playerBase)->mDimKeeper->is2DModel == other->is2D) {
+                    if (!PlayerFunction::isPlayerDeadStatus(playerBase)) {
+                        GameDataFunction::killPlayer(GameDataHolderAccessor(this));
+                        playerBase->startDemoPuppetable();
+                        al::setVelocityZero(playerBase);
+                        rs::faceToCamera(playerBase);
+                        ((PlayerActorHakoniwa*)playerBase)->mPlayerAnimator->endSubAnim();
+                        ((PlayerActorHakoniwa*)playerBase)->mPlayerAnimator->startAnimDead();
+
+                        updateTagState(true);
                     }
-
-                    if (curInfo->isConnected && curInfo->isInSameStage && curInfo->isIt) {
-                        float pupDist = al::calcDistance(playerBase, curInfo->playerPos); // TODO: remove distance calculations and use hit sensors to determine this
-
-                        if (!isYukimaru) {
-                            if (pupDist < 200.f && ((PlayerActorHakoniwa*)playerBase)->mDimKeeper->is2DModel == curInfo->is2D) {
-                                if (!PlayerFunction::isPlayerDeadStatus(playerBase)) {
-                                    GameDataFunction::killPlayer(GameDataHolderAccessor(this));
-                                    playerBase->startDemoPuppetable();
-                                    al::setVelocityZero(playerBase);
-                                    rs::faceToCamera(playerBase);
-                                    ((PlayerActorHakoniwa*)playerBase)->mPlayerAnimator->endSubAnim();
-                                    ((PlayerActorHakoniwa*)playerBase)->mPlayerAnimator->startAnimDead();
-
-                                    mInfo->mIsPlayerIt = true;
-                                    mModeTimer->disableTimer();
-                                    mModeLayout->showSeeking();
-
-                                    Client::sendTagInfPacket();
-                                }
-                            } else if (PlayerFunction::isPlayerDeadStatus(playerBase)) {
-                                mInfo->mIsPlayerIt = true;
-                                mModeTimer->disableTimer();
-                                mModeLayout->showSeeking();
-
-                                Client::sendTagInfPacket();
-                            }
-                        }
-                    }
+                } else if (PlayerFunction::isPlayerDeadStatus(playerBase)) {
+                    updateTagState(true);
                 }
             }
-        } else {
-            mInvulnTime += Time::deltaTime;
         }
 
         mModeTimer->updateTimer();
     }
 
+    // Gravity
     if (mInfo->mIsUseGravity && !isYukimaru) {
         sead::Vector3f gravity;
         if (rs::calcOnGroundNormalOrGravityDir(&gravity, playerBase, playerBase->getPlayerCollision())) {
@@ -189,27 +181,30 @@ void HideAndSeekMode::update() {
                     mInfo->mIsUseGravityCam = true;
                 }
             }
-        } else if (al::isPadTriggerZL(-1)) {
-            if (al::isPadTriggerLeft(-1)) {
-                killMainPlayer(((PlayerActorHakoniwa*)playerBase));
-            }
+        } else if (al::isPadTriggerZL(-1) && al::isPadTriggerLeft(-1)) {
+            killMainPlayer(((PlayerActorHakoniwa*)playerBase));
         }
     }
 
+    // Switch roles
     if (al::isPadTriggerUp(-1) && !al::isPadHoldZL(-1)) {
-        mInfo->mIsPlayerIt = !mInfo->mIsPlayerIt;
-
-        mModeTimer->toggleTimer();
-
-        if(!mInfo->mIsPlayerIt) {
-            mInvulnTime = 0;
-            mModeLayout->showHiding();
-        } else {
-            mModeLayout->showSeeking();
-        }
-
-        Client::sendTagInfPacket();
+        updateTagState(!mInfo->mIsPlayerIt);
     }
 
     mInfo->mHidingTime = mModeTimer->getTime();
+}
+
+void HideAndSeekMode::updateTagState(bool isSeeking) {
+    mInfo->mIsPlayerIt = isSeeking;
+
+    if (isSeeking) {
+        mModeTimer->disableTimer();
+        mModeLayout->showSeeking();
+    } else {
+        mModeTimer->enableTimer();
+        mModeLayout->showHiding();
+        mInvulnTime = 0;
+    }
+
+    Client::sendTagInfPacket();
 }
