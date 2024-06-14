@@ -6,25 +6,25 @@
 #include "logger.hpp"
 #include "actors/PuppetActor.h"
 
-class PuppetHolder { 
+class PuppetHolder {
     public:
         PuppetHolder(int size);
 
         void update();
 
-        bool tryRegisterPuppet(PuppetActor *puppet);
+        bool tryRegisterPuppet(PuppetActor* puppet);
 
-        bool tryRegisterDebugPuppet(PuppetActor *puppet);
+        bool tryRegisterDebugPuppet(PuppetActor* puppet);
 
-        bool checkInfoIsInStage(PuppetInfo *info);
+        bool checkInfoIsInStage(PuppetInfo* info);
 
-        int getSize() {return mPuppetArr.size(); }
+        int getSize() { return mPuppetArr.size(); }
 
-        PuppetActor *getPuppetActor(int idx) {return mPuppetArr[idx];};
+        PuppetActor* getPuppetActor(int idx) { return mPuppetArr[idx]; };
 
-        PuppetActor *getDebugPuppet();
+        PuppetActor* getDebugPuppet();
 
-        void setStageInfo(const char *stageName, u8 scenarioNo);
+        void setStageInfo(const char* stageName, u8 scenarioNo);
 
         void clearPuppets() { mPuppetArr.clear(); }
 
@@ -33,7 +33,7 @@ class PuppetHolder {
     private:
         sead::PtrArray<PuppetActor> mPuppetArr = sead::PtrArray<PuppetActor>();
 
-        PuppetActor *mDebugPuppet;
+        PuppetActor* mDebugPuppet;
 
         sead::FixedSafeString<0x40> mStageName;
 

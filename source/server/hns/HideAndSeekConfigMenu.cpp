@@ -13,7 +13,8 @@ HideAndSeekConfigMenu::HideAndSeekConfigMenu() : GameModeConfigMenu() {
 void HideAndSeekConfigMenu::initMenu(const al::LayoutInitInfo &initInfo) {}
 
 const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
-    HideAndSeekInfo *curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+    HideAndSeekInfo* curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+
     mItems->mBuffer[0].copy(
         GameModeManager::instance()->isMode(GameMode::HIDEANDSEEK)
         && curMode != nullptr
@@ -21,6 +22,7 @@ const sead::WFixedSafeString<0x200>* HideAndSeekConfigMenu::getStringData() {
         ? u"Toggle H&S Gravity (ON) "
         : u"Toggle H&S Gravity (OFF)"
     );
+
     return mItems->mBuffer;
 }
 
@@ -29,7 +31,7 @@ GameModeConfigMenu::UpdateAction HideAndSeekConfigMenu::updateMenu(int selectInd
 
     switch (selectIndex) {
         case 0: {
-            HideAndSeekInfo *curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
+            HideAndSeekInfo* curMode = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
             if (!curMode) {
                 Logger::log("Unable to Load Mode info!\n");
                 return UpdateAction::NOOP;

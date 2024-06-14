@@ -32,7 +32,7 @@ enum PacketType : short {
 };
 
 // attribute otherwise the build log is spammed with unused warnings
-USED static const char *packetNames[] = {
+USED static const char* packetNames[] = {
     "Unknown",
     "Client Initialization",
     "Player Info",
@@ -59,14 +59,6 @@ enum ConnectionTypes {
     INIT,
     RECONNECT
 };
-
-// unused
-/*
-static const char *senderNames[] = {
-    "Server",
-    "Client"
-};
-*/
 
 struct PACKED Packet {
     nn::account::Uid mUserID; // User ID of the packet owner

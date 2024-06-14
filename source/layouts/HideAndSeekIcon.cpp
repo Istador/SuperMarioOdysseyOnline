@@ -13,7 +13,6 @@
 #include "main.hpp"
 
 HideAndSeekIcon::HideAndSeekIcon(const char* name, const al::LayoutInitInfo& initInfo) : al::LayoutActor(name) {
-
     al::initLayoutActor(this, initInfo, "HideAndSeekIcon", 0);
 
     mInfo = GameModeManager::instance()->getInfo<HideAndSeekInfo>();
@@ -23,13 +22,10 @@ HideAndSeekIcon::HideAndSeekIcon(const char* name, const al::LayoutInitInfo& ini
     al::hidePane(this, "SeekingIcon");
     al::hidePane(this, "HidingIcon");
 
-    
     kill();
-
 }
 
 void HideAndSeekIcon::appear() {
-
     al::startAction(this, "Appear", 0);
 
     al::setNerve(this, &nrvHideAndSeekIconAppear);
@@ -46,14 +42,10 @@ bool HideAndSeekIcon::tryEnd() {
 }
 
 bool HideAndSeekIcon::tryStart() {
-
     if (!al::isNerve(this, &nrvHideAndSeekIconWait) && !al::isNerve(this, &nrvHideAndSeekIconAppear)) {
-
         appear();
-
         return true;
     }
-
     return false;
 }
 
@@ -68,22 +60,17 @@ void HideAndSeekIcon::exeWait() {
         al::startAction(this, "Wait", 0);
     }
 
-    GameTime &curTime = mInfo->mHidingTime;
+    GameTime& curTime = mInfo->mHidingTime;
 
     if (curTime.mHours > 0) {
-        al::setPaneStringFormat(this, "TxtCounter", "%01d:%02d:%02d", curTime.mHours, curTime.mMinutes,
-                            curTime.mSeconds);
+        al::setPaneStringFormat(this, "TxtCounter", "%01d:%02d:%02d", curTime.mHours, curTime.mMinutes, curTime.mSeconds);
     } else {
-        al::setPaneStringFormat(this, "TxtCounter", "%02d:%02d", curTime.mMinutes,
-                            curTime.mSeconds);
+        al::setPaneStringFormat(this, "TxtCounter", "%02d:%02d", curTime.mMinutes, curTime.mSeconds);
     }
-
-    
 
     int playerCount = Client::getMaxPlayerCount();
 
     if (playerCount > 0) {
-
         char playerNameBuf[0x100] = {0}; // max of 16 player names if player name size is 0x10
 
         sead::BufferedSafeStringBase<char> playerList = sead::BufferedSafeStringBase<char>(playerNameBuf, 0x200);
@@ -109,11 +96,9 @@ void HideAndSeekIcon::exeWait() {
 
         al::setPaneStringFormat(this, "TxtPlayerList", playerList.cstr());
     }
-    
 }
 
 void HideAndSeekIcon::exeEnd() {
-
     if (al::isFirstStep(this)) {
         al::startAction(this, "End", 0);
     }

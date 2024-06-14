@@ -36,13 +36,13 @@ class SocketClient : public SocketBase {
         bool send(Packet* packet);
         bool recv();
 
-        bool queuePacket(Packet *packet);
+        bool queuePacket(Packet* packet);
         bool trySendQueue();
 
         void sendFunc();
         void recvFunc();
 
-        Packet *tryGetPacket(sead::MessageQueue::BlockType blockType = sead::MessageQueue::BlockType::Blocking);
+        Packet* tryGetPacket(sead::MessageQueue::BlockType blockType = sead::MessageQueue::BlockType::Blocking);
 
         void printPacket(Packet* packet);
         bool isConnected() { return socket_log_state == SOCKET_LOG_CONNECTED; }
@@ -66,10 +66,10 @@ class SocketClient : public SocketBase {
     private:
         sead::Heap* mHeap = nullptr;
         Client* client = nullptr;
-        
+
         al::AsyncFunctorThread* mRecvThread = nullptr;
         al::AsyncFunctorThread* mSendThread = nullptr;
-        
+
         sead::MessageQueue mRecvQueue;
         sead::MessageQueue mSendQueue;
         char* recvBuf = nullptr;

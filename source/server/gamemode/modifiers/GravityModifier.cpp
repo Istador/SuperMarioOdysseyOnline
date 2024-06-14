@@ -7,20 +7,19 @@ GravityModifier::GravityModifier(GameModeBase* mode) : ModeModifierBase(mode) {}
 
 void GravityModifier::enable() {
     ModeModifierBase::enable();
-    if(mTicket && mScene)
+    if (mTicket && mScene)
         al::startCamera(mScene, mTicket, -1);
 }
 
 void GravityModifier::disable() {
     ModeModifierBase::disable();
-    if(mTicket && mScene)
+    if (mTicket && mScene)
         al::endCamera(mScene, mTicket, -1, false);
 }
 
 void GravityModifier::update() {
-
     sead::Vector3f gravity;
-    PlayerActorBase *playerBase = rs::getPlayerActor(mScene);
+    PlayerActorBase* playerBase = rs::getPlayerActor(mScene);
 
     if (rs::calcOnGroundNormalOrGravityDir(&gravity, playerBase, playerBase->getPlayerCollision())) {
         gravity = -gravity;
@@ -28,7 +27,7 @@ void GravityModifier::update() {
         al::setGravity(playerBase, gravity);
         al::setGravity(((PlayerActorHakoniwa*)playerBase)->mHackCap, gravity);
     }
-    
+
     if (al::isPadHoldL(-1)) {
         if (al::isPadTriggerRight(-1)) {
             if (al::isActiveCamera(mTicket)) {
@@ -42,5 +41,4 @@ void GravityModifier::update() {
             killMainPlayer(((PlayerActorHakoniwa*)playerBase));
         }
     }
-
 }

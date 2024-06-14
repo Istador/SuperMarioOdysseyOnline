@@ -9,10 +9,12 @@
 #include "server/hns/HideAndSeekConfigMenu.hpp"
 
 struct HideAndSeekInfo : GameModeInfoBase {
-    HideAndSeekInfo() { mMode = GameMode::HIDEANDSEEK; }
-    bool mIsPlayerIt = false;
-    bool mIsUseGravity = false;
-    bool mIsUseGravityCam = false;
+    HideAndSeekInfo() {
+        mMode = GameMode::HIDEANDSEEK;
+    }
+    bool     mIsPlayerIt      = false;
+    bool     mIsUseGravity    = false;
+    bool     mIsUseGravityCam = false;
     GameTime mHidingTime;
 };
 
@@ -30,17 +32,16 @@ class HideAndSeekMode : public GameModeBase {
 
         void setPlayerTagState(bool state) { mInfo->mIsPlayerIt = state; }
 
-        void enableGravityMode() {mInfo->mIsUseGravity = true;}
+        void enableGravityMode() { mInfo->mIsUseGravity = true; }
         void disableGravityMode() { mInfo->mIsUseGravity = false; }
         bool isUseGravity() const { return mInfo->mIsUseGravity; }
 
-        void setCameraTicket(al::CameraTicket *ticket) {mTicket = ticket;}
+        void setCameraTicket(al::CameraTicket* ticket) { mTicket = ticket; }
 
     private:
-        float mInvulnTime = 0.0f;
-        GameModeTimer* mModeTimer = nullptr;
-        HideAndSeekIcon *mModeLayout = nullptr;
-        HideAndSeekInfo* mInfo = nullptr;
-        al::CameraTicket *mTicket = nullptr;
-
+        float             mInvulnTime = 0.0f;
+        GameModeTimer*    mModeTimer  = nullptr;
+        HideAndSeekIcon*  mModeLayout = nullptr;
+        HideAndSeekInfo*  mInfo       = nullptr;
+        al::CameraTicket* mTicket     = nullptr;
 };

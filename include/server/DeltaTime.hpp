@@ -5,7 +5,6 @@
 #include "sead/math/seadQuatCalcCommon.hpp"
 
 struct Time {
-
     static void calcTime();
 
     static sead::TickTime prevTime;
