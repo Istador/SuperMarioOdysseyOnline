@@ -184,8 +184,9 @@ const char* SocketClient::getUdpStateChar() {
 }
 
 bool SocketClient::send(Packet* packet) {
-    if (this->socket_log_state != SOCKET_LOG_CONNECTED || packet == nullptr)
+    if (this->socket_log_state != SOCKET_LOG_CONNECTED || packet == nullptr) {
         return false;
+    }
 
     char* buffer = reinterpret_cast<char*>(packet);
 
@@ -271,8 +272,7 @@ bool SocketClient::recvTcp() {
 
     // read only the size of a header
     while (valread < headerSize) {
-        int result = 0;
-        result = nn::socket::Recv(fd, recvBuf + valread, headerSize - valread, this->sock_flags);
+        int result = nn::socket::Recv(fd, recvBuf + valread, headerSize - valread, this->sock_flags);
 
         this->socket_errno = nn::socket::GetLastErrno();
 
@@ -307,8 +307,9 @@ bool SocketClient::recvTcp() {
         Logger::disableName();
         Logger::log(" Size: %d", header->mPacketSize);
         Logger::log(" Type: %d", header->mType);
-        if (packetNames[header->mType])
+        if (packetNames[header->mType]) {
             Logger::log(" Type String: %s\n", packetNames[header->mType]);
+        }
         Logger::enableName();
     }
 

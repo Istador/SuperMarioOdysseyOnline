@@ -53,16 +53,19 @@ void GameModeManager::setMode(GameMode mode) {
 }
 
 void GameModeManager::update() {
-    if (!mCurModeBase)
+    if (!mCurModeBase) {
         return;
+    }
 
     bool inScene = al::getSceneHeap() != nullptr;
 
-    if ((mActive && inScene && !mPaused && !mCurModeBase->isModeActive()) || mWasSceneTrans)
+    if ((mActive && inScene && !mPaused && !mCurModeBase->isModeActive()) || mWasSceneTrans) {
         begin();
+    }
 
-    if ((!mActive || mPaused || !inScene) && mCurModeBase->isModeActive())
+    if ((!mActive || mPaused || !inScene) && mCurModeBase->isModeActive()) {
         end();
+    }
 
     mWasSceneTrans = false;
     if (mCurModeBase && mCurModeBase->isModeActive()) {
@@ -102,7 +105,8 @@ void GameModeManager::initScene(const GameModeInitInfo& info) {
     if (mCurModeBase) {
         sead::ScopedCurrentHeapSetter heapSetter(GameModeManager::getSceneHeap());
         mCurModeBase->init(*mLastInitInfo);
-        if (mCurModeBase->isModeActive())
+        if (mCurModeBase->isModeActive()) {
             mWasSceneTrans = true;
+        }
     }
 }
