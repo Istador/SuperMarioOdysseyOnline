@@ -91,7 +91,7 @@ StageSceneStateServerConfig::StageSceneStateServerConfig(
 void StageSceneStateServerConfig::init() {
     initNerve(&nrvStageSceneStateServerConfigMainMenu, 0);
 
-    #ifdef EMU
+    #if EMU
     char ryujinx[0x10] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     nn::account::Uid user;
     nn::account::GetLastOpenedUser(&user);
