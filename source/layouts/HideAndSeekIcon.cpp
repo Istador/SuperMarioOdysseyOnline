@@ -86,16 +86,27 @@ void HideAndSeekIcon::exeWait() {
 
         char playerNameBuf[0x100] = {0}; // max of 16 player names if player name size is 0x10
 
-        sead::BufferedSafeStringBase<char> playerList =
-            sead::BufferedSafeStringBase<char>(playerNameBuf, 0x200);
-    
-        for (size_t i = 0; i < playerCount; i++) {
+        sead::BufferedSafeStringBase<char> playerList = sead::BufferedSafeStringBase<char>(playerNameBuf, 0x200);
+
+        // Add your own name to the list at the top
+        playerList.appendWithFormat("%s %s\n", mInfo->mIsPlayerIt ? "\uE002" : "\uE001", Client::instance()->getClientName());
+
+        // Add all seekers to the list
+        for (int i = 0; i < playerCount; i++) {
             PuppetInfo* curPuppet = Client::getPuppetInfo(i);
-            if (curPuppet && curPuppet->isConnected && (curPuppet->isIt == mInfo->mIsPlayerIt)) {
-                playerList.appendWithFormat("%s\n", curPuppet->puppetName);
+            if (curPuppet && curPuppet->isConnected && curPuppet->isIt) {
+                playerList.appendWithFormat("\uE002 %s\n", curPuppet->puppetName);
             }
         }
-        
+
+        // Add all hiders to the list
+        for (int i = 0; i < playerCount; i++) {
+            PuppetInfo* curPuppet = Client::getPuppetInfo(i);
+            if (curPuppet && curPuppet->isConnected && !curPuppet->isIt) {
+                playerList.appendWithFormat("\uE001 %s\n", curPuppet->puppetName);
+            }
+        }
+
         al::setPaneStringFormat(this, "TxtPlayerList", playerList.cstr());
     }
     
