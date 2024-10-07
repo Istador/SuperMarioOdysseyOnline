@@ -251,6 +251,7 @@ void FreezeTagMode::update() {
     // Create list of runner and chaser player indicies
     int runners = mInfo->mIsPlayerRunner ? 1 : 0;
     int chasers = mInfo->mIsPlayerRunner ? 0 : 1;
+    // RCL TODO: only add people when the round starts, otherwise later joining runners will prevent a wipeout because they missed the round start
     mInfo->mRunnerPlayers.clear();
     mInfo->mChaserPlayers.clear();
     mInfo->mOtherPlayers.clear();
@@ -275,6 +276,7 @@ void FreezeTagMode::update() {
             mInfo->mChaserPlayers.pushBack(other);
         }
     }
+    // RCL TODO: if there are not enough runners/chasers left (e.g. due to disconnect) => end round early
 
     // Verify you are never frozen on chaser team
     if (!mInfo->mIsPlayerRunner && mInfo->mIsPlayerFreeze) {
