@@ -37,6 +37,7 @@ void FreezeTagMode::updateSpectateCam(PlayerActorBase* playerBase) {
         // Force index to decrease if our current target is not ourself and changes to another stage
         if (indexDirection == 0 && mSpectateIndex != -1 && !mInfo->mRunnerPlayers.at(mSpectateIndex)->isInSameStage) {
             indexDirection = -1; // Move index left
+            // RCL TODO: what happens if they disconnect but aren't the last one in the list??
         }
 
         // no direction, end here

@@ -27,6 +27,7 @@ bool FreezeTagMode::isPlayerLastSurvivor(PuppetInfo* player) {
 bool FreezeTagMode::areAllOtherRunnersFrozen(PuppetInfo* player) {
     if (mInfo->mRunnerPlayers.size() < 2 - mInfo->mIsPlayerRunner) {
         return false; // Verify there is at least two runners (including yourself), otherwise disable this functionality
+        // RCL TODO: if there are only two players, then the round can never be won by chasers?
     }
 
     if (mInfo->mIsPlayerRunner && !mInfo->mIsPlayerFreeze) {
