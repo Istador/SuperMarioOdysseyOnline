@@ -272,6 +272,7 @@ bool PuppetActor::receiveMsg(const al::SensorMsg* msg, al::HitSensor* source, al
     }
 
     if ((al::isMsgPlayerTrampleReflect(msg) || rs::isMsgPlayerAndCapObjHipDropReflectAll(msg)) && al::isSensorName(target, "Body")) {
+        // RCL TODO: remove freeze-tag specific code
         if (!GameModeManager::instance()->isModeAndActive(GameMode::FREEZETAG)) {
             rs::requestHitReactionToAttacker(msg, target, source);
             return true;
