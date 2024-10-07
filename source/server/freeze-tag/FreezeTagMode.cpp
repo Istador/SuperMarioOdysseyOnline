@@ -236,6 +236,8 @@ void FreezeTagMode::update() {
     // Create list of runner and chaser player indicies
     int runners = mInfo->mIsPlayerRunner ? 1 : 0;
     int chasers = mInfo->mIsPlayerRunner ? 0 : 1;
+    // RCL TODO: only add people when the round starts, otherwise later joining runners will prevent a wipeout because they missed the round start
+    //           removing people is fine, but does it always check if there are runners/chasers left? => check this, e.g. what happens if the last runner/chaser disconnects
     mInfo->mRunnerPlayers.clear();
     mInfo->mChaserPlayers.clear();
     mInfo->mOtherPlayers.clear();
@@ -288,6 +290,7 @@ void FreezeTagMode::update() {
             if (distance < closestDistance && other->isFreezeTagRunner && !other->isFreezeTagFreeze) {
                 closestDistance       = distance;
                 closestUnfrozenRunner = other;
+                // RCL TODO: optimize - only for chasers?
             }
 
             // skip if we're a chaser
@@ -321,7 +324,7 @@ void FreezeTagMode::update() {
     }
 
     // Set the target position to the closest puppet
-    if (closestUnfrozenRunner) {
+    if (closestUnfrozenRunner) { // RCL TODO: optimize - only for chasers?
         mHintArrow->setTarget(&closestUnfrozenRunner->playerPos);
     } else {
         mHintArrow->setTarget(nullptr);

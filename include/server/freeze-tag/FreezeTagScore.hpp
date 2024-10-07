@@ -23,6 +23,8 @@ class FreezeTagScore {
 
         void eventNotEnoughRunnersToStart() { addScore( 0, "Not enough Runners to start a round"); }
         void eventNotEnoughChasersToStart() { addScore( 0, "Not enough Chasers to start a round"); }
+        void eventNotEnoughRunnersToContinue() { addScore( 0, "Not enough Runners to continue this round"); }
+        void eventNotEnoughChasersToContinue() { addScore( 0, "Not enough Chasers to continue this round"); }
 
     private:
         FreezeTagIcon* mIcon;

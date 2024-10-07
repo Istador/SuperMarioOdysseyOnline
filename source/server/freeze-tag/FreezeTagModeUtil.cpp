@@ -2,8 +2,10 @@
 #include "rs/util.hpp"
 
 bool FreezeTagMode::areAllOtherRunnersFrozen(PuppetInfo* player) {
-    if (mInfo->mRunnerPlayers.size() < 2 - mInfo->mIsPlayerRunner) {
+    if (mInfo->mRunnerPlayers.size() < 1 - mInfo->mIsPlayerRunner) {
         return false; // Verify there is at least two runners (including yourself), otherwise disable this functionality
+        // RCL TODO: if there are only two players, then the round can never be won by chasers?
+        // RCL TODO: changing this breaks compatibility with legacy clients?
     }
 
     if (mInfo->mIsPlayerRunner && !mInfo->mIsPlayerFreeze) {
