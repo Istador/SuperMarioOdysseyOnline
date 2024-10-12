@@ -86,13 +86,10 @@ bool registerShineToList(Shine* shineActor) {
     return al::isAlive(shineActor);
 }
 
-void overrideNerveHook(StageSceneStatePauseMenu* thisPtr, al::Nerve* nrvSet) {
-
-    if (al::isPadHoldZL(-1)) {
-        al::setNerve(thisPtr, &nrvStageSceneStatePauseMenuServerConfig);
-    } else {
-        al::setNerve(thisPtr, nrvSet);
-    }
+void overrideHelpFadeNerve(StageSceneStatePauseMenu* thisPtr) {
+    // Set label in menu inside LocalizedData/${lang}/MessageData/LayoutMessage.szs/Menu.msbt/Menu_Help
+    thisPtr->exeServerConfig();
+    al::setNerve(thisPtr, &nrvStageSceneStatePauseMenuServerConfig);
 }
 
 StageSceneStateServerConfig *sceneStateServerConfig = nullptr;

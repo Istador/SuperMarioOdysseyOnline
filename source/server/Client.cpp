@@ -71,8 +71,8 @@ void Client::init(al::LayoutInitInfo const& initInfo, GameDataHolderAccessor hol
     al::setPaneString(mConnectStatus, "TxtSaveSh", u"Connecting to Server.", 0);
 
     mUIMessage = new (mHeap) al::WindowConfirmWait("ServerWaitConnect", "WindowConfirmWait", initInfo);
-    mUIMessage->setTxtMessage(u"a");
-    mUIMessage->setTxtMessageConfirm(u"b");
+    mUIMessage->setTxtMessage(u"You've been kicked from the server.");
+    mUIMessage->setTxtMessageConfirm(u"You've been banned from the server!");
 
     mHolder = holder;
 
@@ -924,6 +924,17 @@ void Client::updateTagInfo(TagInf* packet) {
  */
 void Client::sendToStage(ChangeStagePacket* packet) {
     if (mSceneInfo && mSceneInfo->mSceneObjHolder) {
+        if (!sInstance->mUIMessage->mIsAlive) {
+            if (strcmp(packet->changeStage, "$agogusStage") == 0) { // kicked
+                sInstance->mUIMessage->appear();
+                nn::os::SleepThread(nn::TimeSpan::FromNanoSeconds(1500000000)); // wait 1.5s
+            } else if (strcmp(packet->changeStage, "$ejected") == 0) { // banned
+                sInstance->mUIMessage->appear();
+                al::startAction(sInstance->mUIMessage, "Confirm", "State");
+                nn::os::SleepThread(nn::TimeSpan::FromNanoSeconds(1500000000)); // wait 1.5s
+            }
+        }
+
         GameDataHolderAccessor accessor(mSceneInfo->mSceneObjHolder);
 
         Logger::log("Sending Player to %s at Entrance %s in Scenario %d\n", packet->changeStage, packet->changeID, packet->scenarioNo);
