@@ -434,6 +434,8 @@ bool SocketClient::tryReconnect() {
         if (init(sock_ip, port).isSuccess()) { // call init again
             Logger::log("Reconnect Successful.\n");
             return true;
+        } else {
+            nn::os::SleepThread(nn::TimeSpan::FromSeconds(1));
         }
     }
 
