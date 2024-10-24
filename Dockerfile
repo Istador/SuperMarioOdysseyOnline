@@ -1,4 +1,4 @@
-FROM  devkitpro/devkita64:latest  as  builder
+FROM  devkitpro/devkita64:latest  AS  builder
 
 # install dependencies
 RUN   apt-get  update       \
@@ -10,4 +10,4 @@ RUN   apt-get  update       \
 
 WORKDIR  /app/
 
-ENTRYPOINT  make
+ENTRYPOINT  [ "make" ]

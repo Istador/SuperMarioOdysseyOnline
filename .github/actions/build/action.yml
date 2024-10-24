@@ -57,7 +57,7 @@ runs:
         -u `id -u`:`id -g`          \
         -v "/$PWD/":/app/           \
         -e ISEMU=${{ (inputs.emu != 'Switch' && '1') || '0' }}  \
-        ${{ (steps.env.outputs.version != '' && format('-e BUILDVER={0}', steps.env.outputs.version)) || '' }}  \
+        ${{ (steps.env.outputs.version != '' && format('-e BUILDVERSTR={0}', steps.env.outputs.version)) || '' }}  \
         smoo-build-env      \
       ;
       cp  -r  ./romfs/  ./starlight_patch_100/atmosphere/contents/0100000000010000/.

@@ -18,7 +18,7 @@ void Logger::createInstance() {
 
 nn::Result Logger::init(const char* ip, u16 port) {
 
-    sock_ip = ip;
+    strcpy(this->sock_ip, ip);
 
     this->port = port;
 

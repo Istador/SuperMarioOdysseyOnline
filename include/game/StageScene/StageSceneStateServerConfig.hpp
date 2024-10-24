@@ -9,13 +9,9 @@
 #include "al/layout/LayoutInitInfo.h"
 #include "al/scene/Scene.h"
 #include "al/util/NerveUtil.h"
-#include "rs/util/InputUtil.h"
-
-#include "al/util.hpp"
 
 #include "game/GameData/GameDataHolder.h"
 
-#include "logger.hpp"
 #include "server/gamemode/GameModeConfigMenu.hpp"
 #include "server/gamemode/GameModeConfigMenuFactory.hpp"
 
@@ -23,14 +19,21 @@ class FooterParts;
 
 class StageSceneStateServerConfig : public al::HostStateBase<al::Scene>, public al::IUseMessageSystem {
     public:
-        StageSceneStateServerConfig(const char*, al::Scene*, const al::LayoutInitInfo&,
-                                    FooterParts*, GameDataHolder*, bool);
+        StageSceneStateServerConfig(
+            const char*,
+            al::Scene*,
+            const al::LayoutInitInfo&,
+            FooterParts*,
+            GameDataHolder*,
+            bool
+        );
 
         enum ServerConfigOption {
             GAMEMODECONFIG,
             GAMEMODESWITCH,
             SETIP,
-            SETPORT
+            SETPORT,
+            HIDESERVER,
         };
 
         virtual al::MessageSystem* getMessageSystem(void) const override;
@@ -41,6 +44,7 @@ class StageSceneStateServerConfig : public al::HostStateBase<al::Scene>, public 
         void exeMainMenu();
         void exeOpenKeyboardIP();
         void exeOpenKeyboardPort();
+        void exeHideServer();
         void exeGamemodeConfig();
         void exeGamemodeSelect();
         void exeSaveData();
@@ -52,32 +56,39 @@ class StageSceneStateServerConfig : public al::HostStateBase<al::Scene>, public 
         inline void subMenuUpdate();
         inline void subMenuRefresh();
 
-        al::MessageSystem* mMsgSystem = nullptr;
-        FooterParts* mFooterParts = nullptr;
-        GameDataHolder* mGameDataHolder = nullptr;
+        al::MessageSystem* mMsgSystem      = nullptr;
+        FooterParts*       mFooterParts    = nullptr;
+        GameDataHolder*    mGameDataHolder = nullptr;
 
-        InputSeparator *mInput = nullptr;
-        
-        SimpleLayoutMenu* mCurrentMenu = nullptr;
+        InputSeparator* mInput = nullptr;
+
+        SimpleLayoutMenu*   mCurrentMenu = nullptr;
         CommonVerticalList* mCurrentList = nullptr;
+
         // Root Page, contains buttons for gamemode config, and server ip address changing
-        SimpleLayoutMenu* mMainOptions = nullptr;
-        CommonVerticalList *mMainOptionsList = nullptr;
+        SimpleLayoutMenu*   mMainOptions     = nullptr;
+        CommonVerticalList* mMainOptionsList = nullptr;
+
         // Sub-Page of Mode config, used to select a gamemode for the client to use
-        SimpleLayoutMenu* mModeSelect = nullptr;
+        SimpleLayoutMenu*   mModeSelect     = nullptr;
         CommonVerticalList* mModeSelectList = nullptr;
 
         // Sub-Pages for Mode configuration, has buttons for selecting current gamemode and configuring currently selected mode (if no mode is chosen, button will not do anything)
         struct GameModeEntry {
             GameModeConfigMenu* mMenu;
-            SimpleLayoutMenu* mLayout = nullptr;
-            CommonVerticalList* mList = nullptr;
+            SimpleLayoutMenu*   mLayout = nullptr;
+            CommonVerticalList* mList   = nullptr;
         };
         sead::SafeArray<GameModeEntry, GameModeConfigMenuFactory::getMenuCount()> mGamemodeConfigMenus;
-        GameModeEntry *mGamemodeConfigMenu = nullptr;
+        GameModeEntry* mGamemodeConfigMenu = nullptr;
 
         inline void activateInput();
         inline void deactivateInput();
+
+        // Main Menu Options
+        static constexpr int mMainMenuOptionsCount = 5;
+        sead::SafeArray<sead::WFixedSafeString<0x200>, mMainMenuOptionsCount>* mMainMenuOptions = nullptr;
+        const sead::WFixedSafeString<0x200>* getMainMenuOptions();
 
         bool mIsDecideConfig = false;
 };
@@ -86,6 +97,7 @@ namespace {
     NERVE_HEADER(StageSceneStateServerConfig, MainMenu)
     NERVE_HEADER(StageSceneStateServerConfig, OpenKeyboardIP)
     NERVE_HEADER(StageSceneStateServerConfig, OpenKeyboardPort)
+    NERVE_HEADER(StageSceneStateServerConfig, HideServer)
     NERVE_HEADER(StageSceneStateServerConfig, GamemodeConfig)
     NERVE_HEADER(StageSceneStateServerConfig, GamemodeSelect)
     NERVE_HEADER(StageSceneStateServerConfig, SaveData)

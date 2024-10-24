@@ -11,7 +11,6 @@
 class GameModeManager {
     SEAD_SINGLETON_DISPOSER(GameModeManager)
     GameModeManager();
-    ~GameModeManager();
 
 public:
     void setMode(GameMode mode);

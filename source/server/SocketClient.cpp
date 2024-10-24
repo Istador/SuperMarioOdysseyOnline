@@ -33,7 +33,7 @@ SocketClient::SocketClient(const char* name, sead::Heap* heap, Client* client) :
 
 nn::Result SocketClient::init(const char* ip, u16 port) {
 
-    this->sock_ip = ip;
+    strcpy(this->sock_ip, ip);
     this->port    = port;
     
     in_addr  hostAddress   = { 0 };
@@ -178,14 +178,14 @@ s32 SocketClient::setPeerUdpPort(u16 port) {
 
 const char* SocketClient::getUdpStateChar() {
     if (this->mUdpAddress.port == 0) {
-        return "Waiting for handshake";
+        return "Not in use";
     }
 
     if (!this->mHasRecvUdp) {
-        return "Waiting for holepunch";
+        return "Initializing...";
     }
 
-    return "Utilizing UDP";
+    return "Using";
 }
 bool SocketClient::send(Packet *packet) {
 
@@ -439,6 +439,8 @@ bool SocketClient::tryReconnect() {
         if (init(sock_ip, port).isSuccess()) { // call init again
             Logger::log("Reconnect Successful.\n");
             return true;
+        } else {
+            nn::os::SleepThread(nn::TimeSpan::FromSeconds(1));
         }
     }
 
